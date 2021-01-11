@@ -1,5 +1,5 @@
 # Avalanche data analysis
-#install.packages("/Users/hycho/Documents/1Research/Rpackages/icrf_0.1.2.tar.gz", repos = NULL, INSTALL_opts = c('--no-lock'))
+#install.packages("/Users/hycho/Documents/1Research/Rpackages/icrf_1.0.2.tar.gz", repos = NULL, INSTALL_opts = c('--no-lock'))
 library(readxl)
 library(dplyr)
 library(magrittr)
@@ -7,6 +7,7 @@ library(icrf)
 require(icenReg)
 library(xtable)
 library(ggplot2)
+library(ggstance)
 
 out_path = "../output/avalanche"
 if (!dir.exists(out_path)) dir.create(out_path)

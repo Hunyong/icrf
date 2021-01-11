@@ -2,7 +2,10 @@
   rm(list = ls())
   args = commandArgs(trailingOnly=TRUE)  # passed from script
   names(args) = c("scenario", "sim", "n.monitor", "pilot")
-  # args = c(1, 1, 1, 0)
+  if (length(args) == 0) {
+    warning("argument is not provided. Set as the default values.")
+    args = c(scenario = 1, sim = 1, n.monitor = 1, pilot = 0)
+  }
   print(args)
   scenario  = as.numeric(args[1]) # scenario = 1, 2, 3, 4, 5, 6
   sim       = as.numeric(args[2]) # replicates = 1..500
@@ -14,8 +17,6 @@ library(icrf); library(icenReg);
 library(MASS); library(dplyr); library(ggplot2)
 source("0functions.R")
 source("1setting.R")
-# source("cox_LASSO/em.func.R")
-# source("cox_LASSO/em.func.sub.R")
 
 {
   ticksize = 0.01; ntest = 300        # test set size for evaluation
@@ -33,8 +34,8 @@ if (file.exists(fn_eval)) stop(paste0(fn_eval, " file already exits"))
 
 result <- list()
 
-print("1. Wilcoxon's RF - 135: non-honest trees")  #updateNPMLE = TRUE: quasihonesty, FALSE : exploitative
-set.seed(seed.no + 1); result$w135 <- rf(method = "Wilcoxon", quasihonesty = F, ERT = T, sampsize = ntrain * 0.95, replace = F) # 0.226 / 0.209
+print("1. Wilcoxon's RF (GWRS), non-honest (exploitative) trees")  #updateNPMLE = TRUE: quasihonesty, FALSE : exploitative
+set.seed(seed.no + 1); result$wE <- rf(method = "Wilcoxon", quasihonesty = F, ERT = T, sampsize = ntrain * 0.95, replace = F) # 0.226 / 0.209
 
 print("Evaluation and saving.")
 result.eval <- summaryEval(result)

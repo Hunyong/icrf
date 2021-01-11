@@ -1,5 +1,5 @@
-date = "2019-09-15"
-ntree = 300; n.sim=100; scenario = 1; n.monitor = 1
+date = "2021-01-10"
+ntree = 300; n.sim=300; scenario = 1; n.monitor = 1
 
 library(ggplot2); library(dplyr); library(purrr)
 library(icenReg); library(MASS)
@@ -31,10 +31,10 @@ grpVec <- do.call(expand.grid, dimnames(tmp))
 names(grpVec) <- c("fold", "measure", "method")
 fn_fig3 = paste0(path_figure, "figSize_total-scenario_", scenario, "-n_m_", n.monitor,".png")
 
-## WRS312 plot
-lvs1 <- c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "w132")
+## GWRS-Quasi_honesty plot
+lvs1 <- c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "wH")
 lbs1 <- c("Cox", "Cox (smooth)", "STIC", "STIC (smooth)", "SFIC", "SFIC (smooth)", "ICRF")
-lvs2 <- c(paste0(c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2"), "-1"), paste0("w132-", c(1:10, "A", "B", "C")))
+lvs2 <- c(paste0(c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2"), "-1"), paste0("wH-", c(1:10, "A", "B", "C")))
 lbs2 <- c("Cox", "Cox-Smooth", "STIC", "STIC (smooth)", "SFIC", "SFIC (smooth)", paste0("ICRF-", c(1:10, "A", "B", "C")))
 shp_method = c(0, 15, 1, 16, 2, 17, 5, 18)
 names(shp_method) = c(lbs2[1:6], "ICRF-1", "ICRF-10")
@@ -51,7 +51,6 @@ p <- list()
 # for (n.monitor in c(1, 3)) {
   for (size in lvs5) {
     cat("n.monitor: ", n.monitor, ", n = ", size,", scenario = ", scenario, "\n")
-    #lapply(1:n.sim, function(s) {
     result <- 
       lapply(1:n.sim, function(s) {
         tmp1 <- fnfun(scenario, n.monitor, sim = s, fn = fn_eval_tmp, size = size)
@@ -67,7 +66,7 @@ p <- list()
     result <- data.frame(value = result, grpVec, sim = rep(1:n.sim, each = dim(grpVec)[1])) %>% 
       na.omit %>% 
       dplyr::filter(grepl("(type1 \\(oob\\)|error)", measure)) %>% 
-      dplyr::filter(grepl("(^w132|cox|Fu)", method)) %>%
+      dplyr::filter(grepl("(^wH|cox|Fu)", method)) %>%
       mutate(methods = paste0(method, "-", fold))
     
     result$method = factor(result$method, levels = lvs1, labels = lbs1)
@@ -106,7 +105,6 @@ grandResult.mean$size = factor(grandResult.mean$size, levels = lvs5, labels = lb
 grandResult.min$size = factor(grandResult.min$size, levels = lvs5, labels = lbs5)
 pd <- position_dodge(0.2)
 grandResult.mean %>% 
-  #dplyr::filter(fold %in% c(1:3, 5, 10, "A", "B", "C")) %>% 
   dplyr::filter(fold %in% c(1, 10)) %>%
   dplyr::filter(grepl("error", measure)) %>% 
   ggplot(aes(x = size, y = mean, col = methods, group = methods)) +

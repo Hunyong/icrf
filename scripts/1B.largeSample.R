@@ -5,7 +5,10 @@
 {
   rm(list = ls())
   args = commandArgs(trailingOnly=TRUE)  # passed from script
-  # args = c(100, 1, 1, 0)
+  if (length(args) == 0) {
+    warning("argument is not provided. Set as the default values.")
+    args = c(n = 100, sim = 1, n.monitor = 1, pilot = 0)
+  }
   names(args) = c("n", "sim", "n.monitor", "pilot")
   print(args)
   n         = as.numeric(args[1]) # number of censoring times = 1, 3
@@ -19,8 +22,6 @@ library(icrf); library(icenReg);
 library(MASS); library(dplyr); library(ggplot2)
 source("0functions.R")
 source("1setting.R")
-# source("cox_LASSO/em.func.R")
-# source("cox_LASSO/em.func.sub.R")
 
 { 
   ticksize = 0.01; ntest = 300        # test set size for evaluation
@@ -39,7 +40,7 @@ if (file.exists(fn_eval)) stop(paste0(fn_eval, " file already exits"))
 
 result <- list()
 
-print("1. Wilcoxon's RF - 132")
+print("1. Wilcoxon's RF (GWRS)")
 set.seed(seed.no + 1); result$w132 <- rf(method = "Wilcoxon", quasihonesty = T, ERT = T, sampsize = ntrain * 0.95, replace = F) # 0.226 / 0.209
 set.seed(seed.no + 1); result$w135 <- rf(method = "Wilcoxon", quasihonesty = F, ERT = T, sampsize = ntrain * 0.95, replace = F) # 0.226 / 0.209
 
@@ -53,13 +54,6 @@ set.seed(seed.no + 1); result$FuRF2 <- Fu(RF = T, smoothing = T)
 print("Cox regression")
 result$cox <- cox(form1, smooth = FALSE)
 result$cox.sm <- cox(form1, smooth = TRUE)
-
-# source("cox_LASSO/em.func.R")
-# source("cox_LASSO/em.func.sub.R")
-# print("Cox-LASSO")
-# tmp.a <- coxLASSO(form1, smooth = "both")
-# result$cox.LS <- tmp.a$noSmooth
-# result$cox.SL.sm <- tmp.a$smooth
 
 
 print("Evaluation and saving.")

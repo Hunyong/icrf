@@ -1,11 +1,5 @@
 setting <- function(scenario, sim, ntrain.monitor, ntree, pilot = 0, ticksize = 0.01, date = NULL, 
                     n = NULL, tau = 5, b1 = 0.1, largeSample = FALSE, nonhonesty = FALSE) {
-    # path <<- "/Users/hycho/Documents/1Research/201902IntCensoredITR/output_lr1/"
-    # path2 <<- "/Users/hycho/Documents/1Research/201902IntCensoredITR/output_wrs/"
-    # fn <<- paste0(path, "sim_scenario-", scenario, "-n.m-", n.monitor, "-logRank-eval-", sim, ".rds")
-    # fn2 <<- paste0(path2, "sim_scenario-", scenario, "-n.m-", n.monitor, "-Wilcoxon-eval-", sim, ".rds")
-  
-    #if (!is.null(b1) && !scenario %in% c(1,6)) stop("b1 is a parameter for scenarios 1 and 6 only.")
     
     path_output <<- paste0("../output/", if (is.null(date)) Sys.Date() else date,"/")
     if (!dir.exists("../output/")) dir.create("../output/")
@@ -108,10 +102,6 @@ setting <- function(scenario, sim, ntrain.monitor, ntree, pilot = 0, ticksize = 
     message(paste0("Starting time is ", time.bgn))
 }
 
-  # rf <- function(..., base.arg = rf.base.args)
-  #       do.call(icrf.default, c(rf.base.args, ntree = ntree, nfold = nfold,
-  #                                nodesize = nmin, ...))
-  # do.call(icrf.default, rf.base.args)
 rf <- function(...) {
   icrf.default(x = train[, 1:P], L = train$L, R = train$R, timeSmooth = Grid, tau = tau,
                xtest = Test[,1:P], ytest = s.test,
