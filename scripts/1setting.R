@@ -1,3 +1,9 @@
+### 1.setting.R
+### An auxiliary code for the simulations (1A, 1B, and 1C). 
+### The setting() function uses global assignments deploying the necessary simulation parameters to the environment,
+###  and setting up the folders, file names, etc.
+### rf(), fu(), cox() are the generic functions made for an easy control of the arguments.
+
 setting <- function(scenario, sim, ntrain.monitor, ntree, pilot = 0, ticksize = 0.01, date = NULL, 
                     n = NULL, tau = 5, b1 = 0.1, largeSample = FALSE, nonhonesty = FALSE) {
     

@@ -1,9 +1,11 @@
+### 1A.main.R
+### Main simulations comparing icrf with other existing methods.
+
 # library(devtools)
 # load_all()
-# setwd("scripts")
-# install.packages("/Users/hycho/Documents/1Research/Rpackages/icrf_1.0.2.tar.gz", repos = NULL, INSTALL_opts = c('--no-lock'))
+# install.packages("icrf")
 {
-  rm(list = ls())
+  # rm(list = ls())
   args = commandArgs(trailingOnly=TRUE)  # passed from script
   if (length(args) == 0) {
     warning("argument is not provided. Set as the default values.")

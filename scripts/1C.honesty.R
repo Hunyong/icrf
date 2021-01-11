@@ -1,5 +1,8 @@
+### 1C.honesty.R
+### Simulations comparing quasi-honesty vs. exploitative approaches.
+
 {
-  rm(list = ls())
+  # rm(list = ls())
   args = commandArgs(trailingOnly=TRUE)  # passed from script
   names(args) = c("scenario", "sim", "n.monitor", "pilot")
   if (length(args) == 0) {
