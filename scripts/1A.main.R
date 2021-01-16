@@ -24,8 +24,8 @@
 
 library(icrf); library(icenReg); 
 library(MASS); library(dplyr); library(ggplot2)
-source("0functions.R")
-source("1setting.R")
+source("scripts/0functions.R")
+source("scripts/1setting.R")
 
 { 
   ticksize = 0.01; ntest = 300        # test set size for evaluation

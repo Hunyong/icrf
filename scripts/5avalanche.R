@@ -9,9 +9,9 @@ library(xtable)
 library(ggplot2)
 library(ggstance)
 
-out_path = "../output/avalanche"
+out_path = "output/avalanche"
 if (!dir.exists(out_path)) dir.create(out_path)
-fig_path = "../figure/avalanche"
+fig_path = "figure/avalanche"
 if (!dir.exists(fig_path)) dir.create(fig_path)
 
 i = as.numeric(commandArgs(trailingOnly=TRUE))[1]  # passed from script
@@ -21,7 +21,7 @@ if (file.exists(paste0(out_path, "/avalanche_eval_", i,".rds"))) stop("Already d
 cat("i = ", i, ", nfold = ", nfold)
 
 # 0.0 reading
-  avalanche = read_xlsx("../Canada_Swiss_Avalanche Data_092112.xlsx", sheet = 2)
+  avalanche = read_xlsx("Canada_Swiss_Avalanche Data_092112.xlsx", sheet = 2)
 
 # 0.1 data cleansing
   
@@ -114,24 +114,24 @@ cat("i = ", i, ", nfold = ", nfold)
       cat("ICRF - Quasi honest\n")
       set.seed(i + 100 * j)
       aval.icrf.H <- 
-        icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
-                     L = log(aval.train$L + 1), R = log(aval.train$R + 1),
-                     t0 = 0, tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
-                     nfold = nfold, ntree = ntree, nodesize = 6, mtry = 2,         # tree structure
-                     replace = F, sampsize = samp.size[j] * 0.95,    # resampling 
-                     method = "Wilcoxon", ERT = TRUE, uniformERT = TRUE,      # splitting rules
-                     quasihonesty = TRUE, timeSmooth = aval.Grid)
+        icrf:::icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
+                            L = log(aval.train$L + 1), R = log(aval.train$R + 1),
+                            t0 = 0, tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
+                            nfold = nfold, ntree = ntree, nodesize = 6, mtry = 2,         # tree structure
+                            replace = F, sampsize = samp.size[j] * 0.95,    # resampling 
+                            method = "Wilcoxon", ERT = TRUE, uniformERT = TRUE,      # splitting rules
+                            quasihonesty = TRUE, timeSmooth = aval.Grid)
       
       cat("ICRF - Exploitative\n")
       set.seed(i + 100 * j)
       aval.icrf.E <- 
-        icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
-                     L = log(aval.train$L + 1), R = log(aval.train$R + 1),
-                     t0 = 0, tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
-                     nfold = nfold, ntree = ntree, nodesize = 6, mtry = 2,         # tree structure
-                     replace = F, sampsize = samp.size[j] * 0.95,    # resampling 
-                     method = "Wilcoxon", ERT = TRUE, uniformERT = TRUE,      # splitting rules
-                     quasihonesty = FALSE, timeSmooth = aval.Grid)
+        icrf:::icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
+                            L = log(aval.train$L + 1), R = log(aval.train$R + 1),
+                            t0 = 0, tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
+                            nfold = nfold, ntree = ntree, nodesize = 6, mtry = 2,         # tree structure
+                            replace = F, sampsize = samp.size[j] * 0.95,    # resampling 
+                            method = "Wilcoxon", ERT = TRUE, uniformERT = TRUE,      # splitting rules
+                            quasihonesty = FALSE, timeSmooth = aval.Grid)
       
       
       bestForest <- data.frame(honest = NA, iter = NA, imse = NA)
@@ -144,49 +144,49 @@ cat("i = ", i, ", nfold = ", nfold)
       cat("FuTR1\n")
       set.seed(i + 100 * j)
       aval.FuTR1 <- 
-        icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
-                     L = log(aval.train$L + 1), R = log(aval.train$R + 1), timeSmooth = aval.Grid,
-                     t0 = 0, tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
-                     nfold = 1, ntree = 1, nodesize = 20, mtry = 3,          # tree structure
-                     replace = F, sampsize = samp.size[j],          # resampling 
-                     method = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,# splitting rules
-                     quasihonesty = TRUE, initialSmoothing = FALSE, bandwidth = 0)
+        icrf:::icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
+                            L = log(aval.train$L + 1), R = log(aval.train$R + 1), timeSmooth = aval.Grid,
+                            t0 = 0, tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
+                            nfold = 1, ntree = 1, nodesize = 20, mtry = 3,          # tree structure
+                            replace = F, sampsize = samp.size[j],          # resampling 
+                            method = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,# splitting rules
+                            quasihonesty = TRUE, initialSmoothing = FALSE, bandwidth = 0)
       
       ## 1.2.2 Fu's Tree 2
       cat("FuTR2\n")
       set.seed(i + 100 * j)
       aval.FuTR2 <- 
-        icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
-                     L = log(aval.train$L + 1), R = log(aval.train$R + 1), timeSmooth = aval.Grid,
-                     t0 = 0, tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
-                     nfold = 1, ntree = 1, nodesize = 20, mtry = 3,          # tree structure
-                     replace = F, sampsize = samp.size[j],          # resampling 
-                     method = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,# splitting rules
-                     quasihonesty = TRUE, initialSmoothing = FALSE, bandwidth = NULL)
+        icrf:::icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
+                            L = log(aval.train$L + 1), R = log(aval.train$R + 1), timeSmooth = aval.Grid,
+                            t0 = 0, tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
+                            nfold = 1, ntree = 1, nodesize = 20, mtry = 3,          # tree structure
+                            replace = F, sampsize = samp.size[j],          # resampling 
+                            method = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,# splitting rules
+                            quasihonesty = TRUE, initialSmoothing = FALSE, bandwidth = NULL)
       
       ## 1.3.1 Fu's RF 1
       cat("FuRF1\n")
       set.seed(i + 100 * j)
       aval.FuRF1 <- 
-        icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
-                     L = log(aval.train$L + 1), R = log(aval.train$R + 1), timeSmooth = aval.Grid,
-                     t0 = 0, tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
-                     nfold = 1, ntree = ntree, nodesize = 6, mtry = 2,               # tree structure
-                     replace = T, sampsize = ceiling(.632 * samp.size[j]),# resampling 
-                     method = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,      # splitting rules
-                     quasihonesty = TRUE, initialSmoothing = FALSE, bandwidth = 0)
+        icrf:::icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
+                            L = log(aval.train$L + 1), R = log(aval.train$R + 1), timeSmooth = aval.Grid,
+                            t0 = 0, tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
+                            nfold = 1, ntree = ntree, nodesize = 6, mtry = 2,               # tree structure
+                            replace = T, sampsize = ceiling(.632 * samp.size[j]),# resampling 
+                            method = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,      # splitting rules
+                            quasihonesty = TRUE, initialSmoothing = FALSE, bandwidth = 0)
       
       ## 1.3.2 Fu's RF 2
       cat("FuRF2\n")
       set.seed(i + 100 * j)
       aval.FuRF2 <- 
-        icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
-                     L = log(aval.train$L + 1), R = log(aval.train$R + 1), timeSmooth = aval.Grid,
-                     t0 = 0, tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
-                     nfold = 1, ntree = ntree, nodesize = 6, mtry = 2,               # tree structure
-                     replace = T, sampsize = ceiling(.632 * samp.size[j]),# resampling 
-                     method = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,      # splitting rules
-                     quasihonesty = TRUE, initialSmoothing = FALSE, bandwidth = NULL)
+        icrf:::icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
+                            L = log(aval.train$L + 1), R = log(aval.train$R + 1), timeSmooth = aval.Grid,
+                            t0 = 0, tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
+                            nfold = 1, ntree = ntree, nodesize = 6, mtry = 2,               # tree structure
+                            replace = T, sampsize = ceiling(.632 * samp.size[j]),# resampling 
+                            method = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,      # splitting rules
+                            quasihonesty = TRUE, initialSmoothing = FALSE, bandwidth = NULL)
       
       
       ## 1.4 Cox models
@@ -194,44 +194,6 @@ cat("i = ", i, ", nfold = ", nfold)
       ## 1.4.1 Cox
       aval.cox <- icenReg::ic_sp(Surv(log(L + 1), log(R + 1), type = 'interval2') ~ Country + GroupActivity + BurialDepth, 
                                  model = "ph", data = aval.train)
-      # aval.cox.hat <-
-      #   lapply(1:samp.size[j], function(i){
-      #     sp_curves <- icenReg::getSCurves(aval.cox, aval.train[i, ])
-      #     sp_int    <- t(sp_curves$Tbull_ints[-1, ])
-      #     sp_curve  <- sp_curves$S_curves[[1]]
-      #     nn        <- length(sp_curve)
-      #     sp_curve[is.na(sp_curve)] <- 0  # force NaN to be zero (S(near end) = 0)
-      #     npmle <- list(
-      #       intmap = sp_int,                           # First row is redundant.
-      #       pf = sp_curve[-nn] - sp_curve[-1]   # Likewise, first row is redundant
-      #     )
-      #     
-      #     s.hat1 <- 1 - isdSm(LR = matrix(c(L = log(aval.train$L + 1), R = log(aval.train$R + 1)), ncol=2), 
-      #                         grid.smooth = aval.Grid, btt = c(0, 0, tau),
-      #                         npmle = npmle)
-      #     s.hat2 <- 1 - isdSm(LR = matrix(c(L = log(aval.train$L + 1), R = log(aval.train$R + 1)), ncol=2), 
-      #                         grid.smooth = aval.Grid, btt = c(NA, 0, tau),
-      #                         npmle = npmle)
-      #     matrix(c(s.hat1, s.hat2), ncol = 2)
-      #   })
-      # 
-      # aval.cox.hat.nonsmooth <- sapply(1:samp.size[j], function(s) aval.cox.hat[[s]][,1]) %>% t
-      # aval.cox.hat.smooth <- sapply(1:samp.size[j], function(s) aval.cox.hat[[s]][,2]) %>% t
-      # 
-      # aval.cox.imse.nonsmooth <- 
-      #   measure(aval.cox.hat.nonsmooth, aval.Grid, t0 = 0, tau = log(1 + tau), 
-      #           method = "imse", L = log(aval.train$L + 1), R = log(aval.train$R + 1))
-      # aval.cox.imse.smooth <- 
-      #   measure(aval.cox.hat.smooth, aval.Grid, t0 = 0, tau = log(1 + tau), 
-      #           method = "imse", L = log(aval.train$L + 1), R = log(aval.train$R + 1))
-      # aval.cox.list <- 
-      #   list(cox = aval.cox,
-      #        predictedNO = aval.cox.hat.nonsmooth,
-      #        predictedNO.Sm = aval.cox.hat.smooth,
-      #        imse.oob = matrix(c(imse.type1 = NaN, imse.type2 = NaN), ncol = 2),
-      #        imse.NO = matrix(aval.cox.imse.nonsmooth, ncol = 2),
-      #        imse.NO.Sm = matrix(aval.cox.imse.smooth, ncol = 2),
-      #        test = NULL)
       
       if (i == 1 && j == 1) {
         saveRDS(aval.icrf.H, paste0(out_path, "/avalanche_ICRF.H.rds"))
@@ -425,29 +387,6 @@ cat("i = ", i, ", nfold = ", nfold)
              color = guide_legend("group activity"))
     ggsave(paste0(fig_path, "/fig_avalanche_ET_.png"), width = 30, height = 19, units = "cm")
     
-    # ## 5.2 IMSE
-    #   aval.test$imse1.icrf <- 
-    #     sapply(1:samp2.n, function(i)
-    #       measure(aval.pred$ICRF[i, , drop = FALSE], timepoints = aval.icrf.H$time.points.smooth, 
-    #               tau = log(1 + tau), method = "imse", 
-    #               L = log(1 + aval.test$L[i]), R = log(1 + aval.test$R[i]))["imse.type1"])
-    #   aval.test$imse1.cox <- 
-    #     sapply(1:samp2.n, function(i)
-    #       measure(aval.cox.hat.pred.smooth[i, , drop = FALSE], timepoints = aval.icrf.H$time.points.smooth, 
-    #               tau = log(1 + tau), method = "imse", 
-    #               L = log(1 + aval.test$L[i]), R = log(1 + aval.test$R[i]))["imse.type1"])
-    #   aval.test.long <-
-    #     aval.test %>% tidyr::gather(key = "method", value = "IMSE1", imse1.icrf, imse1.cox) %>% 
-    #     mutate(method = factor(method, levels = c("imse1.icrf", "imse1.cox"), labels = c("ICRF", "Cox")))
-    #   
-    #   aval.test.long %>% 
-    #     ggplot(aes(BurialDepth, y = IMSE1, col = GroupActivity)) +
-    #     facet_grid(method ~ Country, labeller = labeller(Country = lab.country)) +
-    #     geom_smooth(method = "loess", se = FALSE, fullrange = TRUE) +
-    #     geom_point(aes(x = BurialDepth, y = IMSE1, col = GroupActivity), alpha = 0.5) +
-    #     xlab("burial depth") +
-    #     ylab("expected survival time")
-    #    
   }
   
   

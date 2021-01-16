@@ -17,13 +17,13 @@
   sim       = as.numeric(args[2]) # replicates = 1..500
   n.monitor = as.numeric(args[3])
   pilot     = as.numeric(args[4]) # if 1 pilot, if 0 real simulation.
-  print("1B.largeSample.R")
+  print("scripts/1B.largeSample.R")
   print(if (pilot) "pilot test!" else "real simulation!")
 }
 library(icrf); library(icenReg); 
 library(MASS); library(dplyr); library(ggplot2)
-source("0functions.R")
-source("1setting.R")
+source("scripts/0functions.R")
+source("scripts/1setting.R")
 
 { 
   ticksize = 0.01; ntest = 300        # test set size for evaluation

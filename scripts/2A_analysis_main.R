@@ -1,12 +1,12 @@
-date = "2021-01-10"
+date = "2021-01-13"
 ntree = 300; n.sim=300
 
 library(ggplot2); library(dplyr); library(purrr)
 library(icenReg); library(MASS)
-source("0functions.R")
-source("2analysis-functions.R")
-path_output   <- paste0("../output/", date, "/")
-path_figure    <- paste0("../figure/", date, "/")
+source("scripts/0functions.R")
+source("scripts/2analysis-functions.R")
+path_output   <- paste0("output/", date, "/")
+path_figure    <- paste0("figure/", date, "/")
 if (!dir.exists(path_output)) {
   dir.create(path_output)
   warning("No such folder. Created one.")

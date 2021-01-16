@@ -7,8 +7,8 @@
 setting <- function(scenario, sim, ntrain.monitor, ntree, pilot = 0, ticksize = 0.01, date = NULL, 
                     n = NULL, tau = 5, b1 = 0.1, largeSample = FALSE, nonhonesty = FALSE) {
     
-    path_output <<- paste0("../output/", if (is.null(date)) Sys.Date() else date,"/")
-    if (!dir.exists("../output/")) dir.create("../output/")
+    path_output <<- paste0("output/", if (is.null(date)) Sys.Date() else date,"/")
+    if (!dir.exists("output/")) dir.create("output/")
     if (!dir.exists(path_output)) {
       dir.create(path_output)
       message(paste0(path_output, " was not available and is now created"))
@@ -109,11 +109,11 @@ setting <- function(scenario, sim, ntrain.monitor, ntree, pilot = 0, ticksize = 
 }
 
 rf <- function(...) {
-  icrf.default(x = train[, 1:P], L = train$L, R = train$R, timeSmooth = Grid, tau = tau,
-               xtest = Test[,1:P], ytest = s.test,
-               keep.forest = T, proximity = T, ntree = ntree,
-               nodesize = nmin, nfold = nfold, returnBest = TRUE, imse.monitor = 1,
-               ...)
+  icrf:::icrf.default(x = train[, 1:P], L = train$L, R = train$R, timeSmooth = Grid, tau = tau,
+                      xtest = Test[,1:P], ytest = s.test,
+                      keep.forest = T, proximity = T, ntree = ntree,
+                      nodesize = nmin, nfold = nfold, returnBest = TRUE, imse.monitor = 1,
+                      ...)
 }
 
 Fu <- function(RF = T, smoothing = T, method = "PetoLogrank") {
@@ -137,7 +137,7 @@ Fu <- function(RF = T, smoothing = T, method = "PetoLogrank") {
   } else {
     bw = 0
   }
-  icrf.default(x=train[, 1:P], L = train$L, R = train$R, timeSmooth = Grid, tau = tau,
+  icrf:::icrf.default(x=train[, 1:P], L = train$L, R = train$R, timeSmooth = Grid, tau = tau,
                        xtest = Test[,1:P], ytest = s.test, initialSmoothing = FALSE,
                        keep.forest = T, proximity = T,
                        nodesize = n.min, bandwidth = bw,
@@ -162,9 +162,9 @@ cox <- function(formula, smooth = FALSE) {
         pf = sp_curve[-nn] - sp_curve[-1]   # Likewise, first row is redundant
       )
 
-      s.hat <- 1 - isdSm(LR = matrix(c(L = train$L, R = train$R), ncol=2), 
-                         grid.smooth = Grid, btt = c(bandwidth, 0, tau),
-                         npmle = npmle)
+      s.hat <- 1 - icrf:::isdSm(LR = matrix(c(L = train$L, R = train$R), ncol=2), 
+                                grid.smooth = Grid, btt = c(bandwidth, 0, tau),
+                                npmle = npmle)
     }) %>% t
   }
   
@@ -173,14 +173,14 @@ cox <- function(formula, smooth = FALSE) {
   test.hat     <- hat.fn(n = ntest, dat = Test, model = mod1, nullModel = nullmod,
                          bandwidth = if (smooth) NA else 0)
   
-tmp.train.cox <<- train.hat
-tmp.test.cox <<- test.hat
+# tmp.train.cox <<- train.hat
+# tmp.test.cox <<- test.hat
 # tmp.list <<- list(Grid = Grid, tau = tau, L = train$L, R = train$R,
 #                   s.test = s.test)
 
-  imseerr <- measure(train.hat, Grid, t0 = 0, tau = tau, method = "imse",
+  imseerr <- measure(train.hat, Grid, tau = tau, method = "imse",
                     L = train$L, R = train$R)
-  interr <- measure(test.hat, Grid, t0 = 0, tau = tau, method = "int",
+  interr <- measure(test.hat, Grid, tau = tau, method = "int",
                     surv.true = s.test)
   print(matrix(interr, ncol = 2))
   list(cox = mod1,
