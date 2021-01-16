@@ -4,11 +4,11 @@
 {
   # rm(list = ls())
   args = commandArgs(trailingOnly=TRUE)  # passed from script
-  names(args) = c("scenario", "sim", "n.monitor", "pilot")
   if (length(args) == 0) {
     warning("argument is not provided. Set as the default values.")
     args = c(scenario = 1, sim = 1, n.monitor = 1, pilot = 0)
   }
+  names(args) = c("scenario", "sim", "n.monitor", "pilot")
   print(args)
   scenario  = as.numeric(args[1]) # scenario = 1, 2, 3, 4, 5, 6
   sim       = as.numeric(args[2]) # replicates = 1..500
@@ -18,8 +18,8 @@
 }
 library(icrf); library(icenReg); 
 library(MASS); library(dplyr); library(ggplot2)
-source("0functions.R")
-source("1setting.R")
+source("scripts/0functions.R")
+source("scripts/1setting.R")
 
 {
   ticksize = 0.01; ntest = 300        # test set size for evaluation
