@@ -18,7 +18,14 @@ i = as.numeric(commandArgs(trailingOnly=TRUE))[1]  # passed from script
 nfold = as.numeric(commandArgs(trailingOnly=TRUE))[2]
 if (is.na(nfold)) nfold = 10
 if (file.exists(paste0(out_path, "/avalanche_eval_", i,".rds"))) stop("Already done.")
-cat("i = ", i, ", nfold = ", nfold)
+
+if (is.na(i)) {
+  warning("i (the cross-validation index) was not provided. A full loop will be implemented.")
+  i = 1; rng = 1:300; parallel = FALSE
+} else {
+  rng = i:i; parallel = TRUE
+  cat("i = ", i, ", nfold = ", nfold)
+}
 
 # 0.0 reading
   avalanche = read_xlsx("Canada_Swiss_Avalanche Data_092112.xlsx", sheet = 2)
@@ -74,8 +81,7 @@ cat("i = ", i, ", nfold = ", nfold)
   ntree=300
   #ntree=2;nfold=2
   
-  # i.total <- 0
-  # for (i in 1:300) {
+  for (i in rng) {
     cat("\nreplicate i = ", i, "\n")  
     a <- Sys.time()
     # 0.4 hold-out sample
@@ -89,12 +95,8 @@ cat("i = ", i, ", nfold = ", nfold)
     if (lack) {
       print("Not all levels are not present in train set. Go to the next i.")
       saveRDS(aval.eval.array.i, paste0(out_path, "/avalanche_eval_", i,".rds"))
-      stop("done.")
-      # next
-    } # else {
-      # i.total = i.total + 1
-      # if (i.total > 100) break
-    #}
+      if (parallel) stop("done.") else next
+    }
     
     # samp2 = test set index
     samp2 <- which(!1:aval.complete.n %in% samp1)
@@ -273,7 +275,7 @@ cat("i = ", i, ", nfold = ", nfold)
     # print(apply(aval.eval.array, 1:3, mean, na.rm = TRUE))
     # print(apply(aval.eval.array, 1:3, sd, na.rm = TRUE))
     print(aval.eval.array.i)
-  #}
+  }
   
   if (i == 1) {
     #saveRDS(aval.eval.array, paste0(out_path, "/eval_array_final.rds"))
