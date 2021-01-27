@@ -9,16 +9,18 @@
   args = commandArgs(trailingOnly=TRUE)  # passed from script
   if (length(args) == 0) {
     warning("argument is not provided. Set as the default values.")
-    args = c(scenario = 1, sim = 1, n.monitor = 1, pilot = 0)
+    args = c(scenario = 1, sim = 1, n.monitor = 1, pilot = 0, date = NA)
   }
-  names(args) = c("scenario", "sim", "n.monitor", "pilot")
+  names(args) = c("scenario", "sim", "n.monitor", "pilot", "date")
   
   print(args)
   scenario  = as.numeric(args[1]) # scenario = 1, 2, 3, 4, 5, 6
   sim       = as.numeric(args[2]) # replicates = 1..500
   n.monitor = as.numeric(args[3]) # number of censoring times = 1, 3
   pilot     = as.numeric(args[4]) # if 1 pilot test, if 0 real simulation.
-  print("test.R")
+  date      = as.character(args[5]) # date for the output folder name
+  if (is.na(date)| date == "0") date = NULL
+  print("1A.main.R")
   print(if (pilot) "pilot test!" else "real simulation!")
 }
 
@@ -37,7 +39,7 @@ source("scripts/1setting.R")
     ntree = 300L; nmin = 6; nmin.t = 20; nfold = 10          # tree parameters
   }
 }
-setting(scenario, sim, n.monitor, ntree, pilot)
+setting(scenario, sim, n.monitor, ntree, pilot, date = date)
 
 if (file.exists(fn_eval)) stop(paste0(fn_eval, " file already exits"))
 
