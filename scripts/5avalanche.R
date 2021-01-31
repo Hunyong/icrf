@@ -1,5 +1,5 @@
 # Avalanche data analysis
-#install.packages("/Users/hycho/Documents/1Research/Rpackages/icrf_1.0.2.tar.gz", repos = NULL, INSTALL_opts = c('--no-lock'))
+#install.packages("/Users/hunyongcho/Documents/1Research/Rpackages/icrf_1.0.2.tar.gz", repos = NULL, INSTALL_opts = c('--no-lock'))
 library(readxl)
 library(dplyr)
 library(magrittr)
