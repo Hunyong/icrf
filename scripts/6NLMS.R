@@ -324,6 +324,7 @@
   #nlms.eval.array[ , , j, i] <- nlms.eval
   nlms.eval.array.i[ , ] <- nlms.eval
   print(nlms.eval)
+  saveRDS(nlms.eval.array.i, paste0(out_path, "/nlms_eval_", i,".rds"))
   
   }
     
