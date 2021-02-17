@@ -244,7 +244,7 @@
     cat("7.Cox\n");   
     nlms.cox <- 
       icenReg::ic_sp(Surv(L, R, type = 'interval2') ~ ., model = "ph", 
-                     data = nlms.train %>% mutate(L = time, R = ifelse(delta, time, Inf)) %>% dplyr::select(-time, -delta))
+                     data = nlms.train)
     
     
     if (i == 1) {
