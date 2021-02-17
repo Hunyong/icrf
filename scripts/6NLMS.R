@@ -173,7 +173,7 @@
       cat(sprintf("- %sth effective replicate (after skipping the partial samples).", n.success))
     }
     cat("\n")
-if (n.success > 3) stop("Just finished the first run!!! ") #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    
+
     # samp2 = test set index
     samp2 <- which(!1:nlms.complete.n %in% samp1)
     samp2.n <- samp2 %>% length # 339
