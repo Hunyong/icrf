@@ -376,3 +376,23 @@
     }
 
     #dat.D()
+    
+    
+##### Inducing censoring #####
+cens.nlms = function(data, n.monitor = 1, tau, remove.original = FALSE, time.var = "time", delta.var = "delta") {
+  n = dim(data)[1]  
+  mu = with(data, 1000 + 100 * (10 - age/10 + hhnum))
+  C = t(sapply(1:n, function(x) sort(rnorm(n.monitor, mean = mu[x], sd = 300)))) # matrix of monitoring times
+  if (n.monitor == 1) C = t(C)
+print(summary(C))
+  C[C > tau] <- Inf   # if censoring time is greater than tau, essentially no censoring or Inf.
+  C[C < 0] <- 0       # if censoring time is less than 0, force it to zero.
+  interval.index = sapply(1:(n), function(s) search2(data$time[s], c(0, C[s, ], Inf), include = FALSE))
+  data$L = cbind(0, C, Inf)[cbind(1:(n), interval.index)]
+  data$R = cbind(0, C, Inf)[cbind(1:(n), interval.index + 1)]
+  if (remove.original) {
+    data[[time.var]] = data[[delta.var]] = NULL
+  }
+  data
+}
+# cens.nlms(nlms.complete, tau = 2192)
