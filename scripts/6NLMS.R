@@ -44,7 +44,7 @@
     rng = i:i # 1.
   } else {
     samp.size = 0.5 # 3630 * 0.5 = 1815
-    ntree = 30
+    ntree = 50
     nfold = 5
   }
   
@@ -158,7 +158,7 @@
       nlms.complete %>% 
       mutate(no = 1:n()) %>%
       group_by(race, hisp, hitype) %>% # stratified sampling by the important variables
-      sample_frac(size = 0.1) %>% 
+      sample_frac(size = samp.size) %>% 
       "$"(no)
     lack <- sapply(nlms.complete[samp1, ], check.levels) 
     # lack %T>% print %>% any
@@ -195,9 +195,9 @@
       args.E =
       list(# ~ ., data = nlms.train, data.type = "right", right.label = c("time", "delta"),
            ~ ., data = nlms.train, data.type = "interval", interval.label = c("L", "R"),
-           tau = 2192, proximity = F, importance = TRUE, nPerm = 10,
+           tau = tau, proximity = F, importance = FALSE, nPerm = 10,
            nfold = nfold, ntree = ntree, nodesize = 6, mtry = 4,         # tree structure
-           replace = F, sampsize = dim(nlms.train)[1] * .95,    # resampling 
+           replace = F, sampsize = dim(nlms.train)[1] * .8,    # resampling 
            method = "Wilcoxon", ERT = TRUE, uniformERT = TRUE,      # splitting rules
            quasihonesty = TRUE, timeSmooth = nlms.Grid)
     args.E$quasihonesty = FALSE
@@ -206,7 +206,7 @@
       args.FuTR2 =
       list(#~ ., data = nlms.train, data.type = "right", right.label = c("time", "delta"),
            ~ ., data = nlms.train, data.type = "interval", interval.label = c("L", "R"), 
-           tau = 2192, proximity = F, importance = TRUE, nPerm = 10,
+           tau = tau, proximity = F, importance = FALSE, nPerm = 10,
            nfold = 1, ntree = 1, nodesize = 20, mtry = dim(nlms.train)[2] - 2,         # tree structure
            replace = F, sampsize = dim(nlms.train)[1],    # resampling 
            method = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,      # splitting rules
@@ -218,7 +218,7 @@
       args.FuRF2 =
       list(#~ ., data = nlms.train, data.type = "right", right.label = c("time", "delta"),
            ~ ., data = nlms.train, data.type = "interval", interval.label = c("L", "R"),
-           tau = 2192, proximity = F, importance = TRUE, nPerm = 10,
+           tau = tau, proximity = F, importance = FALSE, nPerm = 10,
            nfold = 1, ntree = ntree, nodesize = 6, mtry = 4,         # tree structure
            replace = T, sampsize = dim(nlms.train)[1] * .632,    # resampling 
            method = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,      # splitting rules
@@ -226,6 +226,10 @@
            timeSmooth = nlms.Grid)
     args.FuRF2$bandwidth = NULL # smoothing
     
+    if (i == 1) { # Measure the variable importance only for the first run.
+      args.H$importance = args.E$importance = args.FuTR1$importance = 
+        args.FuTR2$importance = args.FuRF1$importance = args.FuRF2$importance = TRUE
+    }
     
     cat("1.icrf.H\n");set.seed(i); nlms.icrf.H <- do.call(icrf, args.H)
     cat("2.icrf.E\n");set.seed(i); nlms.icrf.E <- do.call(icrf, args.E)
@@ -233,13 +237,6 @@
     cat("4.FuTR2\n"); set.seed(i); nlms.FuTR2  <- do.call(icrf, args.FuTR2)
     cat("5.FuRF1\n"); set.seed(i); nlms.FuRF1  <- do.call(icrf, args.FuRF1)
     cat("6.FuRF2\n"); set.seed(i); nlms.FuRF2  <- do.call(icrf, args.FuRF2)
-    
-    
-    bestForest <- data.frame(honest = NA, iter = NA, imse = NA)
-    choice <- rbind(nlms.icrf.H$bestFold, nlms.icrf.E$bestFold)
-    bestForest$honest <- choice$imse.best[1] < choice$imse.best[2]
-    bestForest$iter <- choice[2 - bestForest$honest, "bestFold"]
-    bestForest$imse <- choice[2 - bestForest$honest, "imse.best"]
     
     cat("7.Cox\n");   
     nlms.cox <- 
@@ -317,8 +314,7 @@
            test = NULL)
     
     nlms.eval <- 
-      rbind(ICRF.best = nlms.eval[2 - bestForest$honest, ],
-            nlms.eval,
+      rbind(nlms.eval,
             Cox1 = nlms.cox.imse.pred.nonsmooth,
             Cox2 = nlms.cox.imse.pred.smooth)
     #nlms.eval.array[ , , j, i] <- nlms.eval
@@ -441,8 +437,8 @@
   
   if (FALSE) {
     nlms.eval.array <-
-      array(NA, dim = c(9, 2, 300),
-            dimnames = list(method  = c("ICRF.best", "ICRF.H", "icrf.E", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "Cox1", "Cox2"),
+      array(NA, dim = c(8, 2, 300),
+            dimnames = list(method  = c("ICRF.H", "icrf.E", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "Cox1", "Cox2"),
                             measure = c("imse.type1", "imse.type2"),
                             replicate = 1:300))  # i.
     i.total = 0
@@ -460,8 +456,8 @@
     nlms.eval.sd <- apply(nlms.eval.array, 1:2, sd, na.rm = TRUE)
 
     ## WRS312 plot
-    lvs1 <- c("Cox1", "Cox2", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "ICRF.H", "icrf.E", "ICRF.best")
-    lbs1 <- c("Cox", "Cox (smooth)", "STIC", "STIC (smooth)", "SFIC", "SFIC (smooth)", "ICRF (quasi-honest)", "ICRF (exploitative)", "ICRF (best)")
+    lvs1 <- c("Cox1", "Cox2", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "ICRF.H", "icrf.E")
+    lbs1 <- c("Cox", "Cox (smooth)", "STIC", "STIC (smooth)", "SFIC", "SFIC (smooth)", "ICRF (quasi-honest)", "ICRF (exploitative)")
     lvs3 <- c("imse.type1", "imse.type2")
     lbs3 <- c("IMSE1", "IMSE2")
     # lvs5 <- lbs5 <- samp.size[4:1]
@@ -473,7 +469,7 @@
       mutate(method = factor(method, levels = lvs1, labels = lbs1),
              measure = factor(measure, levels = lvs3, labels = lbs3))
     pd <- position_dodge(0.3)
-    ggplot(nlms.eval.summary, aes(method, mean, col = method, group = method)) +
+    ggplot(nlms.eval.summary, aes(method, mean, col = method, shape = method, group = method)) +
       geom_line(position = pd) +
       geom_point(position = pd) +
       geom_errorbar(aes(ymin = mean - 1.96 * sd, ymax = mean + 1.96 * sd), width = 0.1,
