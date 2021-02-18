@@ -439,53 +439,51 @@
   }
   
   
-  # if (FALSE) {
-  #   nlms.eval.array <-
-  #     array(NA, dim = c(8, 2, 4, 300),
-  #           dimnames = list(method  = c("ICRF.H", "icrf.E", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "Cox1", "Cox2"),
-  #                           measure = c("imse.type1", "imse.type2"),
-  #                           size    = samp.size, # j. = c(789, 395, 198, 99)
-  #                           replicate = 1:300))  # i.
-  #   i.total = 0
-  #   for (i in 1:120) {
-  #     tmp <- readRDS(paste0(out_path, "/nlms_eval_", i, ".rds"))
-  #     if (all(is.na(tmp))) next
-  #     cat(i, " ")
-  #     i.total = i.total + 1
-  #     nlms.eval.array[ , , , i] <- readRDS(paste0(out_path, "/nlms_eval_", i, ".rds"))
-  #     if (i.total >= 100) break
-  #   }
-  #   # mean
-  #   nlms.eval.m <- apply(nlms.eval.array, 1:3, mean, na.rm = TRUE)
-  #   # sd
-  #   nlms.eval.sd <- apply(nlms.eval.array, 1:3, sd, na.rm = TRUE)
-  #   
-  #   ## WRS312 plot
-  #   lvs1 <- c("Cox1", "Cox2", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "ICRF.H", "icrf.E")
-  #   lbs1 <- c("Cox", "Cox (smooth)", "STIC", "STIC (smooth)", "SFIC", "SFIC (smooth)", "ICRF (quasi-honest)", "ICRF (exploitative)")
-  #   lvs3 <- c("imse.type1", "imse.type2")
-  #   lbs3 <- c("IMSE1", "IMSE2")
-  #   lvs5 <- lbs5 <- samp.size[4:1]
-  #   
-  #   nlms.eval.summary <-   
-  #     data.frame(expand.grid(c(dimnames(nlms.eval.m)))) %>% 
-  #     mutate(mean = as.vector(nlms.eval.m),
-  #            sd = as.vector(nlms.eval.sd)) %>% 
-  #     mutate(method = factor(method, levels = lvs1, labels = lbs1),
-  #            measure = factor(measure, levels = lvs3, labels = lbs3),
-  #            size = factor(size, levels = lvs5, labels = lbs5))
-  #   pd <- position_dodge(0.3)
-  #   ggplot(nlms.eval.summary, aes(size, mean, col = method, shape = method, group = method)) +
-  #     geom_line(position = pd) +
-  #     geom_point(position = pd) +
-  #     geom_errorbar(aes(ymin = mean - 1.96 * sd, ymax = mean + 1.96 * sd), width = 0.1, 
-  #                   position = pd, alpha = 0.4) + 
-  #     facet_grid(. ~ measure) +
-  #     ylab ("Mean error with 95% confindence intervals") +
-  #     xlab ("training sample size")
-  #   ggsave(paste0(fig_path, "/fig_nlms_size.png"), width = 20, height = 15, units = "cm")
-  # }
-  # 
+  if (FALSE) {
+    nlms.eval.array <-
+      array(NA, dim = c(9, 2, 300),
+            dimnames = list(method  = c("ICRF.best", "ICRF.H", "icrf.E", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "Cox1", "Cox2"),
+                            measure = c("imse.type1", "imse.type2"),
+                            replicate = 1:300))  # i.
+    i.total = 0
+    for (i in 1:300) {
+      tmp <- readRDS(paste0(out_path, "/nlms_eval_", i, ".rds"))
+      if (all(is.na(tmp))) next
+      cat(i, " ")
+      i.total = i.total + 1
+      nlms.eval.array[ , , i] <- readRDS(paste0(out_path, "/nlms_eval_", i, ".rds"))
+      if (i.total >= 100) break
+    }
+    # mean
+    nlms.eval.m <- apply(nlms.eval.array, 1:2, mean, na.rm = TRUE)
+    # sd
+    nlms.eval.sd <- apply(nlms.eval.array, 1:2, sd, na.rm = TRUE)
+
+    ## WRS312 plot
+    lvs1 <- c("Cox1", "Cox2", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "ICRF.H", "icrf.E", "ICRF.best")
+    lbs1 <- c("Cox", "Cox (smooth)", "STIC", "STIC (smooth)", "SFIC", "SFIC (smooth)", "ICRF (quasi-honest)", "ICRF (exploitative)", "ICRF (best)")
+    lvs3 <- c("imse.type1", "imse.type2")
+    lbs3 <- c("IMSE1", "IMSE2")
+    # lvs5 <- lbs5 <- samp.size[4:1]
+
+    nlms.eval.summary <-
+      data.frame(expand.grid(c(dimnames(nlms.eval.m)))) %>%
+      mutate(mean = as.vector(nlms.eval.m),
+             sd = as.vector(nlms.eval.sd)) %>%
+      mutate(method = factor(method, levels = lvs1, labels = lbs1),
+             measure = factor(measure, levels = lvs3, labels = lbs3))
+    pd <- position_dodge(0.3)
+    ggplot(nlms.eval.summary, aes(method, mean, col = method, group = method)) +
+      geom_line(position = pd) +
+      geom_point(position = pd) +
+      geom_errorbar(aes(ymin = mean - 1.96 * sd, ymax = mean + 1.96 * sd), width = 0.1,
+                    position = pd, alpha = 0.4) +
+      facet_grid(. ~ measure) +
+      ylab ("Mean error with 95% confindence intervals") +
+      xlab ("training sample size")
+    ggsave(paste0(fig_path, "/fig_nlms_size.png"), width = 20, height = 15, units = "cm")
+  }
+
 
 
 
