@@ -274,58 +274,58 @@
     print(nlms.eval)
     
 
-  ## 3. Cox model test prediction
-  nlms.cox.hat.pred <-
-    lapply(1:samp2.n, function(i){
-      sp_curves <- icenReg::getSCurves(nlms.cox, nlms.test[i, ])
-      sp_int    <- t(sp_curves$Tbull_ints[-1, ])
-      sp_curve  <- sp_curves$S_curves[[1]]
-      nn        <- length(sp_curve)
-      sp_curve[is.na(sp_curve)] <- 0  # force NaN to be zero (S(near end) = 0)
-      npmle <- list(
-        intmap = sp_int,                           # First row is redundant.
-        pf = sp_curve[-nn] - sp_curve[-1]   # Likewise, first row is redundant
-      )
-
-      s.hat1 <- 1 - icrf:::isdSm(LR = matrix(c(L = nlms.test$L, R = nlms.test$R), ncol=2),
-                                 grid.smooth = nlms.Grid, btt = c(0, 0, tau),
-                                 npmle = npmle)
-      s.hat2 <- 1 - icrf:::isdSm(LR = matrix(c(L = nlms.test$L, R = nlms.test$R), ncol=2),
-                                 grid.smooth = nlms.Grid, btt = c(nlms.icrf.H$method$bandwidth, 0, tau),
-                                 npmle = npmle)
-      matrix(c(s.hat1, s.hat2), ncol = 2)
-    })
-  nlms.cox.hat.pred.nonsmooth <- sapply(1:samp2.n, function(s) nlms.cox.hat.pred[[s]][,1]) %>% t
-  nlms.cox.hat.pred.smooth <- sapply(1:samp2.n, function(s) nlms.cox.hat.pred[[s]][,2]) %>% t
-
+    ## 3. Cox model test prediction
+    nlms.cox.hat.pred <-
+      lapply(1:samp2.n, function(i){
+        sp_curves <- icenReg::getSCurves(nlms.cox, nlms.test[i, ])
+        sp_int    <- t(sp_curves$Tbull_ints[-1, ])
+        sp_curve  <- sp_curves$S_curves[[1]]
+        nn        <- length(sp_curve)
+        sp_curve[is.na(sp_curve)] <- 0  # force NaN to be zero (S(near end) = 0)
+        npmle <- list(
+          intmap = sp_int,                           # First row is redundant.
+          pf = sp_curve[-nn] - sp_curve[-1]   # Likewise, first row is redundant
+        )
   
-  # evaluation
-  nlms.cox.imse.pred.nonsmooth <- 
-    measure(nlms.cox.hat.pred.nonsmooth, nlms.Grid, tau = tau, 
-            method = "imse", L = nlms.test$L, R = nlms.test$R)
-  nlms.cox.imse.pred.smooth <- 
-    measure(nlms.cox.hat.pred.smooth, nlms.Grid, tau = tau, 
-            method = "imse", L = nlms.test$L, R = nlms.test$R)
-  # putting cox all in one
-  nlms.cox.pred.list <- 
-    list(cox = nlms.cox,
-         predictedNO = nlms.cox.hat.pred.nonsmooth,
-         predictedNO.Sm = nlms.cox.hat.pred.smooth,
-         imse.oob = matrix(c(imse.type1 = NaN, imse.type2 = NaN), ncol = 2),
-         imse.NO = matrix(nlms.cox.imse.pred.nonsmooth, ncol = 2),
-         imse.NO.Sm = matrix(nlms.cox.imse.pred.smooth, ncol = 2),
-         test = NULL)
+        s.hat1 <- 1 - icrf:::isdSm(LR = matrix(c(L = nlms.test$L, R = nlms.test$R), ncol=2),
+                                   grid.smooth = nlms.Grid, btt = c(0, 0, tau),
+                                   npmle = npmle)
+        s.hat2 <- 1 - icrf:::isdSm(LR = matrix(c(L = nlms.test$L, R = nlms.test$R), ncol=2),
+                                   grid.smooth = nlms.Grid, btt = c(nlms.icrf.H$method$bandwidth, 0, tau),
+                                   npmle = npmle)
+        matrix(c(s.hat1, s.hat2), ncol = 2)
+      })
+    nlms.cox.hat.pred.nonsmooth <- sapply(1:samp2.n, function(s) nlms.cox.hat.pred[[s]][,1]) %>% t
+    nlms.cox.hat.pred.smooth <- sapply(1:samp2.n, function(s) nlms.cox.hat.pred[[s]][,2]) %>% t
   
-  nlms.eval <- 
-    rbind(ICRF.best = nlms.eval[2 - bestForest$honest, ],
-          nlms.eval,
-          Cox1 = nlms.cox.imse.pred.nonsmooth,
-          Cox2 = nlms.cox.imse.pred.smooth)
-  #nlms.eval.array[ , , j, i] <- nlms.eval
-  nlms.eval.array.i[ , ] <- nlms.eval
-  print(nlms.eval)
-  saveRDS(nlms.eval.array.i, paste0(out_path, "/nlms_eval_", i,".rds"))
-  
+    
+    # evaluation
+    nlms.cox.imse.pred.nonsmooth <- 
+      measure(nlms.cox.hat.pred.nonsmooth, nlms.Grid, tau = tau, 
+              method = "imse", L = nlms.test$L, R = nlms.test$R)
+    nlms.cox.imse.pred.smooth <- 
+      measure(nlms.cox.hat.pred.smooth, nlms.Grid, tau = tau, 
+              method = "imse", L = nlms.test$L, R = nlms.test$R)
+    # putting cox all in one
+    nlms.cox.pred.list <- 
+      list(cox = nlms.cox,
+           predictedNO = nlms.cox.hat.pred.nonsmooth,
+           predictedNO.Sm = nlms.cox.hat.pred.smooth,
+           imse.oob = matrix(c(imse.type1 = NaN, imse.type2 = NaN), ncol = 2),
+           imse.NO = matrix(nlms.cox.imse.pred.nonsmooth, ncol = 2),
+           imse.NO.Sm = matrix(nlms.cox.imse.pred.smooth, ncol = 2),
+           test = NULL)
+    
+    nlms.eval <- 
+      rbind(ICRF.best = nlms.eval[2 - bestForest$honest, ],
+            nlms.eval,
+            Cox1 = nlms.cox.imse.pred.nonsmooth,
+            Cox2 = nlms.cox.imse.pred.smooth)
+    #nlms.eval.array[ , , j, i] <- nlms.eval
+    nlms.eval.array.i[ , ] <- nlms.eval
+    print(nlms.eval)
+    saveRDS(nlms.eval.array.i, paste0(out_path, "/nlms_eval_", i,".rds"))
+    gc()
   }
     
 
