@@ -74,9 +74,9 @@ if (is.na(i)) {
   
   samp.size <- ceiling(aval.complete.n * 0.7 * 2^-(0:3))
   aval.eval.array.i <- 
-    array(NA, dim = c(9, 2, 4), 
+    array(NA, dim = c(9, 3, 4), 
           dimnames = list(method  = c("ICRF.best", "ICRF.H", "icrf.E", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "Cox1", "Cox2"),
-                          measure = c("imse.type1", "imse.type2"),
+                          measure = c("imse.type1", "imse.type2", "runtime"),
                           size    = samp.size)) # j. = c(789, 395, 198, 99)
   ntree=300
   #ntree=2;nfold=2
@@ -118,7 +118,7 @@ if (is.na(i)) {
       aval.icrf.H <- 
         icrf:::icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
                             L = log(aval.train$L + 1), R = log(aval.train$R + 1),
-                            t0 = 0, tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
+                            tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
                             nfold = nfold, ntree = ntree, nodesize = 6, mtry = 2,         # tree structure
                             replace = F, sampsize = samp.size[j] * 0.95,    # resampling 
                             method = "Wilcoxon", ERT = TRUE, uniformERT = TRUE,      # splitting rules
@@ -129,7 +129,7 @@ if (is.na(i)) {
       aval.icrf.E <- 
         icrf:::icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
                             L = log(aval.train$L + 1), R = log(aval.train$R + 1),
-                            t0 = 0, tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
+                            tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
                             nfold = nfold, ntree = ntree, nodesize = 6, mtry = 2,         # tree structure
                             replace = F, sampsize = samp.size[j] * 0.95,    # resampling 
                             method = "Wilcoxon", ERT = TRUE, uniformERT = TRUE,      # splitting rules
@@ -148,7 +148,7 @@ if (is.na(i)) {
       aval.FuTR1 <- 
         icrf:::icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
                             L = log(aval.train$L + 1), R = log(aval.train$R + 1), timeSmooth = aval.Grid,
-                            t0 = 0, tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
+                            tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
                             nfold = 1, ntree = 1, nodesize = 20, mtry = 3,          # tree structure
                             replace = F, sampsize = samp.size[j],          # resampling 
                             method = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,# splitting rules
@@ -160,7 +160,7 @@ if (is.na(i)) {
       aval.FuTR2 <- 
         icrf:::icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
                             L = log(aval.train$L + 1), R = log(aval.train$R + 1), timeSmooth = aval.Grid,
-                            t0 = 0, tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
+                            tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
                             nfold = 1, ntree = 1, nodesize = 20, mtry = 3,          # tree structure
                             replace = F, sampsize = samp.size[j],          # resampling 
                             method = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,# splitting rules
@@ -172,7 +172,7 @@ if (is.na(i)) {
       aval.FuRF1 <- 
         icrf:::icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
                             L = log(aval.train$L + 1), R = log(aval.train$R + 1), timeSmooth = aval.Grid,
-                            t0 = 0, tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
+                            tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
                             nfold = 1, ntree = ntree, nodesize = 6, mtry = 2,               # tree structure
                             replace = T, sampsize = ceiling(.632 * samp.size[j]),# resampling 
                             method = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,      # splitting rules
@@ -184,7 +184,7 @@ if (is.na(i)) {
       aval.FuRF2 <- 
         icrf:::icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
                             L = log(aval.train$L + 1), R = log(aval.train$R + 1), timeSmooth = aval.Grid,
-                            t0 = 0, tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
+                            tau = log(tau + 1), proximity = F, importance = TRUE, nPerm = 10,
                             nfold = 1, ntree = ntree, nodesize = 6, mtry = 2,               # tree structure
                             replace = T, sampsize = ceiling(.632 * samp.size[j]),# resampling 
                             method = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,      # splitting rules
@@ -214,9 +214,13 @@ if (is.na(i)) {
                           function(s) predict(s, newdata = aval.test[, c("Country", "GroupActivity", "BurialDepth")]))
       names(aval.pred) <- c("ICRF.H", "ICRF.E", "FuTR1", "FuTR2", "FuRF1", "FuRF2")
       # test set evaluation for trees
-      aval.eval <- sapply(aval.pred, function(s) measure(surv.hat = s, t0 = 0, tau = log(1 + tau), 
+      aval.eval <- sapply(aval.pred, function(s) measure(surv.hat = s, tau = log(1 + tau), 
                                                          timepoints = aval.icrf.H$time.points.smooth, method = "imse", 
                                                          L = log(aval.test$L + 1), R = log(aval.test$R + 1))) %>% t
+      runtime = c(aval.icrf.H$runtime$elapsed, aval.icrf.E$runtime$elapsed, 
+                  aval.FuTR1$runtime$elapsed, aval.FuTR2$runtime$elapsed, 
+                  aval.FuRF1$runtime$elapsed, aval.FuRF2$runtime$elapsed)
+      aval.eval = cbind(aval.eval, runtime = runtime)
       
       
       ## 3. Cox model test prediction
@@ -224,6 +228,8 @@ if (is.na(i)) {
         lapply(1:samp2.n, function(i){
           sp_curves <- icenReg::getSCurves(aval.cox, aval.test[i, ])
           sp_int    <- t(sp_curves$Tbull_ints[-1, ])
+          # When the final interval should be unbounded as long as there is at lest one unbounded interval in data.
+          if (is.infinite(max(aval.train$R))) sp_int[2, dim(sp_int)[2]] = Inf 
           sp_curve  <- sp_curves$S_curves[[1]]
           nn        <- length(sp_curve)
           sp_curve[is.na(sp_curve)] <- 0  # force NaN to be zero (S(near end) = 0)
@@ -232,17 +238,44 @@ if (is.na(i)) {
             pf = sp_curve[-nn] - sp_curve[-1]   # Likewise, first row is redundant
           )
 
-          s.hat1 <- 1 - isdSm(LR = matrix(c(L = log(aval.test$L + 1), R = log(aval.test$R + 1)), ncol=2),
-                              grid.smooth = aval.Grid, btt = c(0, 0, tau),
-                              npmle = npmle)
-          s.hat2 <- 1 - isdSm(LR = matrix(c(L = log(aval.test$L + 1), R = log(aval.test$R + 1)), ncol=2),
-                              grid.smooth = aval.Grid, btt = c(NA, 0, tau),
-                              npmle = npmle)
+          s.hat1 <- 1 - icrf:::isdSm(LR = matrix(c(L = log(aval.test$L + 1), R = log(aval.test$R + 1)), ncol=2),
+                                     grid.smooth = aval.Grid, btt = c(0, 0, tau),
+                                     npmle = npmle)
+          s.hat2 <- 1 - icrf:::isdSm(LR = matrix(c(L = log(aval.test$L + 1), R = log(aval.test$R + 1)), ncol=2),
+                                     grid.smooth = aval.Grid, btt = c(NA, 0, tau),
+                                     npmle = npmle)
           matrix(c(s.hat1, s.hat2), ncol = 2)
         })
       aval.cox.hat.pred.nonsmooth <- sapply(1:samp2.n, function(s) aval.cox.hat.pred[[s]][,1]) %>% t
       aval.cox.hat.pred.smooth <- sapply(1:samp2.n, function(s) aval.cox.hat.pred[[s]][,2]) %>% t
 
+      # evaluation
+      aval.cox.imse.pred.nonsmooth <- 
+        measure(aval.cox.hat.pred.nonsmooth, aval.Grid, tau = log(1 + tau), 
+                method = "imse", L = log(aval.test$L + 1), R = log(aval.test$R + 1))
+      aval.cox.imse.pred.smooth <- 
+        measure(aval.cox.hat.pred.smooth, aval.Grid, tau = log(1 + tau), 
+                method = "imse", L = log(aval.test$L + 1), R = log(aval.test$R + 1))
+      # putting cox all in one
+      aval.cox.pred.list <- 
+        list(cox = aval.cox,
+             predictedNO = aval.cox.hat.pred.nonsmooth,
+             predictedNO.Sm = aval.cox.hat.pred.smooth,
+             imse.oob = matrix(c(imse.type1 = NaN, imse.type2 = NaN), ncol = 2),
+             imse.NO = matrix(aval.cox.imse.pred.nonsmooth, ncol = 2),
+             imse.NO.Sm = matrix(aval.cox.imse.pred.smooth, ncol = 2),
+             test = NULL)
+      
+      aval.eval <- 
+        rbind(ICRF.best = aval.eval[2 - bestForest$honest, ],
+              aval.eval,
+              Cox1 = aval.cox.imse.pred.nonsmooth,
+              Cox2 = aval.cox.imse.pred.smooth)
+      #aval.eval.array[ , , j, i] <- aval.eval
+      aval.eval.array.i[ , , j] <- aval.eval
+      print(aval.eval)
+      
+      
       # evaluation
       aval.cox.imse.pred.nonsmooth <- 
         measure(aval.cox.hat.pred.nonsmooth, aval.Grid, t0 = 0, tau = log(1 + tau), 
@@ -263,8 +296,8 @@ if (is.na(i)) {
       aval.eval <- 
         rbind(ICRF.best = aval.eval[2 - bestForest$honest, ],
               aval.eval,
-              Cox1 = aval.cox.imse.pred.nonsmooth,
-              Cox2 = aval.cox.imse.pred.smooth)
+              Cox1 = c(aval.cox.imse.pred.nonsmooth, runtime = NA),
+              Cox2 = c(aval.cox.imse.pred.smooth, runtime = NA))
       #aval.eval.array[ , , j, i] <- aval.eval
       aval.eval.array.i[ , , j] <- aval.eval
       print(aval.eval)
@@ -394,9 +427,9 @@ if (is.na(i)) {
   
   if (FALSE) {
     aval.eval.array <-
-      array(NA, dim = c(8, 2, 4, 300),
+      array(NA, dim = c(8, 3, 4, 300),
             dimnames = list(method  = c("ICRF.H", "icrf.E", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "Cox1", "Cox2"),
-                            measure = c("imse.type1", "imse.type2"),
+                            measure = c("imse.type1", "imse.type2", "runtime"),
                             size    = samp.size, # j. = c(789, 395, 198, 99)
                             replicate = 1:300))  # i.
     i.total = 0
@@ -416,12 +449,13 @@ if (is.na(i)) {
     ## WRS312 plot
     lvs1 <- c("Cox1", "Cox2", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "ICRF.H", "icrf.E")
     lbs1 <- c("Cox", "Cox (smooth)", "STIC", "STIC (smooth)", "SFIC", "SFIC (smooth)", "ICRF (quasi-honest)", "ICRF (exploitative)")
-    lvs3 <- c("imse.type1", "imse.type2")
+    lvs3 <- c("imse.type1", "imse.type2", "runtime")
     lbs3 <- c("IMSE1", "IMSE2")
     lvs5 <- lbs5 <- samp.size[4:1]
     
     aval.eval.summary <-   
       data.frame(expand.grid(c(dimnames(aval.eval.m)))) %>% 
+      dplyr::filter(measure != "runtime") %>% 
       mutate(mean = as.vector(aval.eval.m),
              sd = as.vector(aval.eval.sd)) %>% 
       mutate(method = factor(method, levels = lvs1, labels = lbs1),
