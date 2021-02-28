@@ -31,7 +31,7 @@
   
   if (is.na(i)) {
     warning("i (the cross-validation index) was not provided. A full loop will be implemented.")
-    i = 1; rng = 1:500; parallel = FALSE
+    i = 1; rng = 1:300; parallel = FALSE
   } else {
     rng = i:i; parallel = TRUE
     cat("i = ", i, "\n")
@@ -43,8 +43,8 @@
     nfold= 2
     rng = i:i # 1.
   } else {
-    samp.size = 0.5 # 3630 * 0.5 = 1815
-    ntree = 50
+    samp.size = 0.7 # 3630 * 0.7 = 1815
+    ntree = 50     # preliminary. Later increase to ntree = 300, nfold = 10
     nfold = 5
   }
   
@@ -121,26 +121,23 @@
               # 
               
               )
-  tau = 2192
   nlms %>% dim # 745,162 x 14
-  
   nlms.complete = nlms %>% na.omit %>% dplyr::filter(age > 80)
   nlms.complete.n = nlms.complete %>% NROW %>% print # 574,795 x 15
+  tau = 1500   # The actual study end was 2192. However, for the data we analyze, the failure is very sparse after 1500.
   sapply(nlms.complete, check.levels) # hitype, reltrf
   for (i in 1:dim(nlms.complete)[2]) nlms.complete[[i]] <- drop.levels(nlms.complete[[i]])
   sapply(nlms.complete, nlevels)
   sapply(nlms.complete, check.levels)
   
   nlms.Grid <- c(0, exp(seq(0, log(tau), length.out = 200)), Inf)
-  
-  
   nlms$delta %>% mean # 0.033 # High censoring rate.
   nlms.complete$delta %>% mean # 0.30 # moderate censoring rate.
   
-  nlms.eval.array.i <- 
-    array(NA, dim = c(9, 2), 
-          dimnames = list(method  = c("ICRF.best", "ICRF.H", "icrf.E", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "Cox1", "Cox2"),
-                          measure = c("imse.type1", "imse.type2")))
+  # nlms.eval.array.i <- 
+  #   array(NA, dim = c(8, 3), 
+  #         dimnames = list(method  = c("ICRF.H", "icrf.E", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "Cox1", "Cox2"),
+  #                         measure = c("imse.type1", "imse.type2", "runtime")))
   
   
 
@@ -197,7 +194,7 @@
            ~ ., data = nlms.train, data.type = "interval", interval.label = c("L", "R"),
            tau = tau, proximity = F, importance = FALSE, nPerm = 10,
            nfold = nfold, ntree = ntree, nodesize = 6, mtry = 4,         # tree structure
-           replace = F, sampsize = dim(nlms.train)[1] * .8,    # resampling 
+           replace = F, sampsize = dim(nlms.train)[1] * .95,    # resampling 
            method = "Wilcoxon", ERT = TRUE, uniformERT = TRUE,      # splitting rules
            quasihonesty = TRUE, timeSmooth = nlms.Grid)
     args.E$quasihonesty = FALSE
@@ -243,16 +240,15 @@
       icenReg::ic_sp(Surv(L, R, type = 'interval2') ~ ., model = "ph", 
                      data = nlms.train)
     
-    
-    if (i == 1) {
-      saveRDS(nlms.icrf.H, sprintf("%s/%snlms_ICRF.H.rds", out_path, ifelse(pilot, "pilot_", "")))
-      saveRDS(nlms.icrf.E, sprintf("%s/%snlms_ICRF.E.rds", out_path, ifelse(pilot, "pilot_", "")))
-      saveRDS(nlms.FuTR1, sprintf("%s/%snlms_FuTR1.rds", out_path, ifelse(pilot, "pilot_", "")))
-      saveRDS(nlms.FuTR2, sprintf("%s/%snlms_FuTR2.rds", out_path, ifelse(pilot, "pilot_", "")))
-      saveRDS(nlms.FuRF1, sprintf("%s/%snlms_FuRF1.rds", out_path, ifelse(pilot, "pilot_", "")))
-      saveRDS(nlms.FuRF2, sprintf("%s/%snlms_FuRF2.rds", out_path, ifelse(pilot, "pilot_", "")))
-      #saveRDS(nlms.cox.list, sprintf("%s/%snlms_cox.rds", out_path, ifelse(pilot, "pilot_", "")))
-      saveRDS(nlms.cox, sprintf("%s/%snlms_cox.rds", out_path, ifelse(pilot, "pilot_", "")))
+    if (i %in% 1:10) {
+      saveRDS(nlms.icrf.H, sprintf("%s/%snlms_ICRF.H.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
+      saveRDS(nlms.icrf.E, sprintf("%s/%snlms_ICRF.E.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
+      saveRDS(nlms.FuTR1, sprintf("%s/%snlms_FuTR1.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
+      saveRDS(nlms.FuTR2, sprintf("%s/%snlms_FuTR2.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
+      saveRDS(nlms.FuRF1, sprintf("%s/%snlms_FuRF1.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
+      saveRDS(nlms.FuRF2, sprintf("%s/%snlms_FuRF2.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
+      #saveRDS(nlms.cox.list, sprintf("%s/%snlms_cox.rds", out_path, ifelse(pilot, "pilot_", ""), i))
+      saveRDS(nlms.cox, sprintf("%s/%snlms_cox.rds", out_path, ifelse(pilot, "pilot_", ""), i))
     }
     
     
@@ -267,8 +263,12 @@
                                                        timepoints = nlms.icrf.H$time.points.smooth, method = "imse", 
                                                        L = nlms.test$time, 
                                                        R = ifelse(nlms.test$delta, nlms.test$time, Inf))) %>% t
+    runtime = c(nlms.icrf.H$runtime$elapsed, nlms.icrf.E$runtime$elapsed, 
+                nlms.FuTR1$runtime$elapsed, nlms.FuTR2$runtime$elapsed, 
+                nlms.FuRF1$runtime$elapsed, nlms.FuRF2$runtime$elapsed)
+    nlms.eval = cbind(nlms.eval, runtime = runtime)
+    # print(nlms.eval)
     
-    print(nlms.eval)
     
 
     ## 3. Cox model test prediction
@@ -276,6 +276,8 @@
       lapply(1:samp2.n, function(i){
         sp_curves <- icenReg::getSCurves(nlms.cox, nlms.test[i, ])
         sp_int    <- t(sp_curves$Tbull_ints[-1, ])
+        # When the final interval should be unbounded as long as there is at lest one unbounded interval in data.
+        if (is.infinite(max(nlms.train$R))) sp_int[2, dim(sp_int)[2]] = Inf 
         sp_curve  <- sp_curves$S_curves[[1]]
         nn        <- length(sp_curve)
         sp_curve[is.na(sp_curve)] <- 0  # force NaN to be zero (S(near end) = 0)
@@ -315,12 +317,10 @@
     
     nlms.eval <- 
       rbind(nlms.eval,
-            Cox1 = nlms.cox.imse.pred.nonsmooth,
-            Cox2 = nlms.cox.imse.pred.smooth)
-    #nlms.eval.array[ , , j, i] <- nlms.eval
-    nlms.eval.array.i[ , ] <- nlms.eval
+            Cox1 = c(nlms.cox.imse.pred.nonsmooth, runtime = NA),
+            Cox2 = c(nlms.cox.imse.pred.smooth, runtime = NA))
     print(nlms.eval)
-    saveRDS(nlms.eval.array.i, paste0(out_path, "/nlms_eval_", i,".rds"))
+    saveRDS(nlms.eval, paste0(out_path, "/nlms_eval_", i,".rds"))
     gc()
   }
     
@@ -436,24 +436,28 @@
   
   
   if (FALSE) {
+    library(ggplot2)
+    n.eval = 300
+    mth = c("ICRF.H", "icrf.E", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "Cox1", "Cox2")
     nlms.eval.array <-
-      array(NA, dim = c(8, 2, 300),
-            dimnames = list(method  = c("ICRF.H", "icrf.E", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "Cox1", "Cox2"),
-                            measure = c("imse.type1", "imse.type2"),
-                            replicate = 1:300))  # i.
+      array(NA, dim = c(length(mth), 3, n.eval),
+            dimnames = list(method  = mth,
+                            measure = c("imse.type1", "imse.type2", "runtime"),
+                            replicate = 1:n.eval))  # i.
     i.total = 0
-    for (i in 1:300) {
+    for (i in 1:n.eval) {
       tmp <- readRDS(paste0(out_path, "/nlms_eval_", i, ".rds"))
       if (all(is.na(tmp))) next
       cat(i, " ")
       i.total = i.total + 1
       nlms.eval.array[ , , i] <- readRDS(paste0(out_path, "/nlms_eval_", i, ".rds"))
-      if (i.total >= 100) break
+      # if (i.total >= 100) break
     }
+    
     # mean
-    nlms.eval.m <- apply(nlms.eval.array, 1:2, mean, na.rm = TRUE)
+    nlms.eval.m <- apply(nlms.eval.array, 1:2, mean, na.rm = TRUE) %>% print
     # sd
-    nlms.eval.sd <- apply(nlms.eval.array, 1:2, sd, na.rm = TRUE)
+    nlms.eval.sd <- apply(nlms.eval.array, 1:2, sd, na.rm = TRUE) %>% print
 
     ## WRS312 plot
     lvs1 <- c("Cox1", "Cox2", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "ICRF.H", "icrf.E")
@@ -468,16 +472,28 @@
              sd = as.vector(nlms.eval.sd)) %>%
       mutate(method = factor(method, levels = lvs1, labels = lbs1),
              measure = factor(measure, levels = lvs3, labels = lbs3))
-    pd <- position_dodge(0.3)
-    ggplot(nlms.eval.summary, aes(method, mean, col = method, shape = method, group = method)) +
-      geom_line(position = pd) +
-      geom_point(position = pd) +
-      geom_errorbar(aes(ymin = mean - 1.96 * sd, ymax = mean + 1.96 * sd), width = 0.1,
-                    position = pd, alpha = 0.4) +
-      facet_grid(. ~ measure) +
-      ylab ("Mean error with 95% confindence intervals") +
-      xlab ("training sample size")
-    ggsave(paste0(fig_path, "/fig_nlms_size.png"), width = 20, height = 15, units = "cm")
+    # pd <- position_dodge(0.3)
+    # ggplot(nlms.eval.summary, aes(method, mean, col = method, shape = method, group = method)) +
+    #   geom_line(position = pd) +
+    #   geom_point(position = pd) +
+    #   geom_errorbar(aes(ymin = mean - 1.96 * sd, ymax = mean + 1.96 * sd), width = 0.1,
+    #                 position = pd, alpha = 0.4) +
+    #   facet_grid(. ~ measure) +
+    #   ylab ("Mean error with 95% confindence intervals") +
+    #   xlab ("training sample size")
+    # ggsave(paste0(fig_path, "/fig_nlms_size.png"), width = 20, height = 15, units = "cm")
+    
+    
+    nlms.eval.df = 
+      nlms.eval.array[, 1,] %>% t %>% as.data.frame %>% # IMSE1 and 2 are equal in this data set.
+      tidyr::gather(key = "method", value = "IMSE") %>% 
+      mutate(method = factor(method, levels = lvs1, labels = lbs1))
+    ggplot(nlms.eval.df, aes(method, IMSE, col = method)) +
+      geom_boxplot() +
+      geom_jitter(width = 0.2, height = 0, alpha = 0.2) +
+      theme(axis.text.x = element_text(angle = 40)) +
+      geom_point(data = nlms.eval.summary, aes(method, mean), col = "black", shape = "square")
+    ggsave(paste0(fig_path, "/fig_nlms_box.png"), width = 20, height = 15, units = "cm")
   }
 
 
