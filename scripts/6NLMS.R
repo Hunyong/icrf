@@ -444,14 +444,12 @@
             dimnames = list(method  = mth,
                             measure = c("imse.type1", "imse.type2", "runtime"),
                             replicate = 1:n.eval))  # i.
-    i.total = 0
+    
     for (i in 1:n.eval) {
       tmp <- readRDS(paste0(out_path, "/nlms_eval_", i, ".rds"))
       if (all(is.na(tmp))) next
       cat(i, " ")
-      i.total = i.total + 1
       nlms.eval.array[ , , i] <- readRDS(paste0(out_path, "/nlms_eval_", i, ".rds"))
-      # if (i.total >= 100) break
     }
     
     # mean
