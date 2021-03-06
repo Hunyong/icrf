@@ -82,7 +82,9 @@ if (is.na(i)) {
     set.seed(i)
     # samp1 = train set index
     samp1 <- sample(1:aval.complete.n, samp.size[1]) %>% sort
-    lack <- any(! act %in% unique(min.set$GroupActivity)) || any(! cnt %in% unique(min.set$Country))
+    lack <- 
+      any(! act %in% unique(aval.complete$GroupActivity[samp1])) || 
+      any(! cnt %in% unique(aval.complete$Country[samp1]))
     if (lack) {
       print("Not all levels are not present in train set. Go to the next i.")
       saveRDS(aval.eval.array.i, paste0(out_path, "/avalanche_eval_", i,".rds"))
