@@ -266,10 +266,10 @@ if (is.na(i)) {
     
     # evaluation
     aval.cox.imse.pred.nonsmooth <- 
-      measure(aval.cox.hat.pred.nonsmooth, aval.Grid, t0 = 0, tau = log(1 + tau), 
+      measure(aval.cox.hat.pred.nonsmooth, aval.Grid, tau = log(1 + tau), 
               method = "imse", L = log(aval.test$L + 1), R = log(aval.test$R + 1))
     aval.cox.imse.pred.smooth <- 
-      measure(aval.cox.hat.pred.smooth, aval.Grid, t0 = 0, tau = log(1 + tau), 
+      measure(aval.cox.hat.pred.smooth, aval.Grid, tau = log(1 + tau), 
               method = "imse", L = log(aval.test$L + 1), R = log(aval.test$R + 1))
     # putting cox all in one
     aval.cox.pred.list <- 
