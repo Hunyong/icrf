@@ -87,7 +87,7 @@ if (is.na(i)) {
       any(! cnt %in% unique(aval.complete$Country[samp1]))
     if (lack) {
       print("Not all levels are not present in train set. Go to the next i.")
-      saveRDS(aval.eval.array.i, paste0(out_path, "/avalanche_eval_", i,".rds"))
+      # saveRDS(NA, paste0(out_path, "/avalanche_eval_", i,"_NULL.rds"))
       if (parallel) stop("done.") else next
     }
     
@@ -289,11 +289,11 @@ if (is.na(i)) {
     print(aval.eval)
   
     print(Sys.time() - a)
-    saveRDS(aval.eval.array.i, paste0(out_path, "/avalanche_eval_", i,".rds"))
+    saveRDS(aval.eval, paste0(out_path, "/avalanche_eval_", i,".rds"))
     
     # print(apply(aval.eval.array, 1:3, mean, na.rm = TRUE))
     # print(apply(aval.eval.array, 1:3, sd, na.rm = TRUE))
-    print(aval.eval.array.i)
+    print(aval.eval)
   }
   
   if (i == 1) {

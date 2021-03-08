@@ -329,13 +329,13 @@
   if (i == 1) {
   
     # reading back the first replicate
-    nlms.icrf.H <- readRDS(paste0(out_path, "/nlms_ICRF.H.rds"))
-    nlms.icrf.E <- readRDS(paste0(out_path, "/nlms_ICRF.E.rds"))
-    nlms.FuTR1 <- readRDS(paste0(out_path, "/nlms_FuTR1.rds"))
-    nlms.FuTR2 <- readRDS(paste0(out_path, "/nlms_FuTR2.rds"))
-    nlms.FuRF1 <- readRDS(paste0(out_path, "/nlms_FuRF1.rds"))
-    nlms.FuRF2 <- readRDS(paste0(out_path, "/nlms_FuRF2.rds"))
-    nlms.cox <- readRDS(paste0(out_path, "/nlms_cox.rds"))
+    nlms.icrf.H <- readRDS(paste0(out_path, "/nlms_ICRF.H.1.rds"))
+    nlms.icrf.E <- readRDS(paste0(out_path, "/nlms_ICRF.E.1.rds"))
+    nlms.FuTR1 <- readRDS(paste0(out_path, "/nlms_FuTR1.1.rds"))
+    nlms.FuTR2 <- readRDS(paste0(out_path, "/nlms_FuTR2.1.rds"))
+    nlms.FuRF1 <- readRDS(paste0(out_path, "/nlms_FuRF1.1.rds"))
+    nlms.FuRF2 <- readRDS(paste0(out_path, "/nlms_FuRF2.1.rds"))
+    nlms.cox <- readRDS(paste0(out_path, "/nlms_cox.1.rds"))
     
     
     ## 4. variable importance   #Health insurance type, age are the most important factors according to IMSE criterion (for node impurity, weight and health is the most important).
@@ -466,8 +466,9 @@
 
     nlms.eval.summary <-
       data.frame(expand.grid(c(dimnames(nlms.eval.m)))) %>%
-      mutate(mean = as.vector(nlms.eval.m),
-             sd = as.vector(nlms.eval.sd)) %>%
+      dplyr::filter(measure != "runtime") %>% 
+      mutate(mean = as.vector(nlms.eval.m[, 1:2]),
+             sd = as.vector(nlms.eval.sd[, 1:2])) %>%
       mutate(method = factor(method, levels = lvs1, labels = lbs1),
              measure = factor(measure, levels = lvs3, labels = lbs3))
     # pd <- position_dodge(0.3)
@@ -490,7 +491,10 @@
       geom_boxplot() +
       geom_jitter(width = 0.2, height = 0, alpha = 0.2) +
       theme(axis.text.x = element_text(angle = 40)) +
-      geom_point(data = nlms.eval.summary, aes(method, mean), col = "black", shape = "square")
+      theme_bw() +
+      geom_point(data = nlms.eval.summary, aes(method, mean), col = "black", shape = "square") 
+    # + ylim(c(0.075, 0.2))
+      
     ggsave(paste0(fig_path, "/fig_nlms_box.png"), width = 20, height = 15, units = "cm")
   }
 
