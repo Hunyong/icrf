@@ -74,7 +74,6 @@ result$cox.sm <- cox(form1, smooth = TRUE)
 
 print("Evaluation and saving.")
 result.eval <- summaryEval(result)
-saveRDS(result.eval, fn_eval)
 
+saveRDS(result.eval, fn_eval)
 if (sim == 1) saveRDS(result, fn_output)
-Sys.time() - time.bgn  # time elapsed.

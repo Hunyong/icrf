@@ -148,6 +148,7 @@ Fu <- function(RF = T, smoothing = T, method = "PetoLogrank") {
 cox <- function(formula, smooth = FALSE) {
   require(icenReg)
   require(dplyr)
+  time.bgn = Sys.time()
   mod1 <- icenReg::ic_sp(formula, model = "ph", data = train)
   if (formula[[3]] == 1) nullmod = TRUE else nullmod = FALSE
   hat.fn <- function(n, dat, model, bandwidth, nullModel = FALSE) {
@@ -183,11 +184,13 @@ cox <- function(formula, smooth = FALSE) {
   interr <- measure(test.hat, Grid, tau = tau, method = "int",
                     surv.true = s.test)
   print(matrix(interr, ncol = 2))
+  time.end = Sys.time()
   list(cox = mod1,
        predictedNO.Sm = train.hat,
        imse.oob = matrix(c(imse.type1 = NaN, imse.type2 = NaN), ncol = 2),
        imse.NO = matrix(imseerr, ncol = 2),
-       test = list(predicted = test.hat, testerror = matrix(interr, ncol = 2)))
+       test = list(predicted = test.hat, testerror = matrix(interr, ncol = 2)),
+       runtime = data.frame(begin = time.bgn, end = time.end, elapsed = time.end - time.bgn))
 }
 
 
@@ -280,9 +283,12 @@ extrErr <- function(obj, nfold = dim(a)[1]) {
 }
 summaryEval <- function(obj) {
   a <- lapply(obj, extrErr, nfold)
-  array(unlist(a), 
-        dim = c(dim(a[[1]]), length(a)),
-        dimnames = c(dimnames(a[[1]]), list(names(a))))
+  time <- sapply(obj, function(s) s$runtime$elapsed)
+  structure(
+    array(unlist(a), 
+          dim = c(dim(a[[1]]), length(a)),
+          dimnames = c(dimnames(a[[1]]), list(names(a)))),
+    runtime = time)
 }
 
 
