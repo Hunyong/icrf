@@ -188,14 +188,14 @@ if (is.na(i)) {
                                model = "ph", data = aval.train)
     
     if (i %in% 1:10) {
-      saveRDS(aval.icrf.H, paste0(out_path, "/avalanche_ICRF.H.rds"))
-      saveRDS(aval.icrf.E, paste0(out_path, "/avalanche_ICRF.E.rds"))
-      saveRDS(aval.FuTR1, paste0(out_path, "/avalanche_FuTR1.rds"))
-      saveRDS(aval.FuTR2, paste0(out_path, "/avalanche_FuTR2.rds"))
-      saveRDS(aval.FuRF1, paste0(out_path, "/avalanche_FuRF1.rds"))
-      saveRDS(aval.FuRF2, paste0(out_path, "/avalanche_FuRF2.rds"))
+      saveRDS(aval.icrf.H, sprintf("%s/%savalanche_ICRF.H.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
+      saveRDS(aval.icrf.E, sprintf("%s/%savalanche_ICRF.E.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
+      saveRDS(aval.FuTR1, sprintf("%s/%savalanche_FuTR1.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
+      saveRDS(aval.FuTR2, sprintf("%s/%savalanche_FuTR2.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
+      saveRDS(aval.FuRF1, sprintf("%s/%savalanche_FuRF1.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
+      saveRDS(aval.FuRF2, sprintf("%s/%savalanche_FuTR2.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
       #saveRDS(aval.cox.list, paste0(out_path, "/avalanche_cox.rds"))
-      saveRDS(aval.cox, paste0(out_path, "/avalanche_cox.rds"))
+      saveRDS(aval.cox, sprintf("%s/%savalanche_Cox.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
     }
     
     ## 2. Test set evaluation - Trees
@@ -305,13 +305,13 @@ if (is.na(i)) {
     
     
     # reading back the first replicate
-    aval.icrf.H <- readRDS(paste0(out_path, "/avalanche_ICRF.H.rds"))
-    aval.icrf.E <- readRDS(paste0(out_path, "/avalanche_ICRF.E.rds"))
-    aval.FuTR1 <- readRDS(paste0(out_path, "/avalanche_FuTR1.rds"))
-    aval.FuTR2 <- readRDS(paste0(out_path, "/avalanche_FuTR2.rds"))
-    aval.FuRF1 <- readRDS(paste0(out_path, "/avalanche_FuRF1.rds"))
-    aval.FuRF2 <- readRDS(paste0(out_path, "/avalanche_FuRF2.rds"))
-    aval.cox <- readRDS(paste0(out_path, "/avalanche_cox.rds"))
+    aval.icrf.H <- readRDS(paste0(out_path, "/avalanche_ICRF.H.1.rds"))
+    aval.icrf.E <- readRDS(paste0(out_path, "/avalanche_ICRF.E.1.rds"))
+    aval.FuTR1 <- readRDS(paste0(out_path, "/avalanche_FuTR1.1.rds"))
+    aval.FuTR2 <- readRDS(paste0(out_path, "/avalanche_FuTR2.1.rds"))
+    aval.FuRF1 <- readRDS(paste0(out_path, "/avalanche_FuRF1.1.rds"))
+    aval.FuRF2 <- readRDS(paste0(out_path, "/avalanche_FuRF2.1.rds"))
+    aval.cox <- readRDS(paste0(out_path, "/avalanche_cox.1.rds"))
     
     
     ## 4. variable importance
@@ -412,36 +412,46 @@ if (is.na(i)) {
   
   
   if (FALSE) {
+    method.nm = c("ICRF.H", "ICRF.E", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "Cox1", "Cox2")
     aval.eval.array <-
-      array(NA, dim = c(8, 3, 4, 300),
-            dimnames = list(method  = c("ICRF.H", "icrf.E", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "Cox1", "Cox2"),
+      array(NA, dim = c(8, 3, 300),
+            dimnames = list(method  = method.nm,
                             measure = c("imse.type1", "imse.type2", "runtime"),
-                            size    = samp.size, # j. 789
                             replicate = 1:300))  # i.
     
     for (i in 1:300) {
-      tmp <- readRDS(paste0(out_path, "/avalanche_eval_", i, ".rds"))
-      if (all(is.na(tmp))) next
-      cat(i, " ")
-      aval.eval.array[ , , , i] <- readRDS(paste0(out_path, "/avalanche_eval_", i, ".rds"))
+      tmp.nm = paste0(out_path, "/avalanche_eval_", i, ".rds")
+      if (file.exists(tmp.nm)) {
+        if (file.info(tmp.nm)$size < 1) {
+          cat(i, " zero file size.\n ")
+          next
+        } 
+        tmp <- readRDS(tmp.nm)
+        if (all(is.na(tmp))) next
+        aval.eval.array[ , , i] <- tmp[method.nm, ]
+      } else {
+        cat(i, " not available.\n ")
+        next
+      }
+      
     }
     # mean
-    aval.eval.m <- apply(aval.eval.array, 1:3, mean, na.rm = TRUE)
+    aval.eval.m <- apply(aval.eval.array, 1:2, mean, na.rm = TRUE)
     # sd
-    aval.eval.sd <- apply(aval.eval.array, 1:3, sd, na.rm = TRUE)
+    aval.eval.sd <- apply(aval.eval.array, 1:2, sd, na.rm = TRUE)
     
     ## WRS312 plot
     lvs1 <- c("Cox1", "Cox2", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "ICRF.H", "icrf.E")
     lbs1 <- c("Cox", "Cox (smooth)", "STIC", "STIC (smooth)", "SFIC", "SFIC (smooth)", "ICRF (quasi-honest)", "ICRF (exploitative)")
-    lvs3 <- c("imse.type1", "imse.type2", "runtime")
+    lvs3 <- c("imse.type1", "imse.type2")
     lbs3 <- c("IMSE1", "IMSE2")
     # lvs5 <- lbs5 <- samp.size[4:1]
     
     aval.eval.summary <-   
       data.frame(expand.grid(c(dimnames(aval.eval.m)))) %>% 
-      dplyr::filter(measure != "runtime") %>% 
       mutate(mean = as.vector(aval.eval.m),
              sd = as.vector(aval.eval.sd)) %>% 
+      dplyr::filter(measure != "runtime") %>% 
       mutate(method = factor(method, levels = lvs1, labels = lbs1),
              measure = factor(measure, levels = lvs3, labels = lbs3))
     pd <- position_dodge(0.3)

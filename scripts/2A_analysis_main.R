@@ -1,4 +1,4 @@
-date = "2021-01-17"
+date = "2021-03-24"
 ntree = 300; n.sim=300
 
 library(ggplot2); library(dplyr); library(purrr)
@@ -53,9 +53,9 @@ for (n.monitor in c(1, 3)) {
     result.A <- # best for each of quasihonest and exploitative
       data.frame(value = result, grpVec, sim = rep(1:n.sim, each = dim(grpVec)[1])) %>%
       tidyr::spread(key = measure, value = value) %>%
-      dplyr::filter(!is.na(`ibs.type1 (oob)`)) %>%
+      dplyr::filter(!is.na(`imse.type1 (oob)`)) %>%
       group_by(sim, method) %>%
-      dplyr::filter(`ibs.type1 (oob)`== min(`ibs.type1 (oob)`)) %>% # find the best imse1.
+      dplyr::filter(`imse.type1 (oob)`== min(`imse.type1 (oob)`)) %>% # find the best imse1.
       mutate(fold = "A", value = int.error, measure = "int.error") %>%
       ungroup %>%
       dplyr::select(value, fold, measure, method, sim)
@@ -125,7 +125,7 @@ for (n.monitor in c(1, 3)) {
     theme_bw() +  xlab("iterations") +
     ylab("integrated error (1Q, mean, 3Q)") + 
     theme(axis.text.x = element_text(angle = 90), legend.position = "bottom") # +
-  ggsave(fn_fig,  width = 6, height = 5)
+  ggsave(fn_fig,  width = 6, height = 9)
   gc()
   
 }
@@ -138,7 +138,7 @@ lvs1 <- c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2", type)
 lbs1 <- c("Cox", "Cox (smooth)", "STIC", "STIC (smooth)", "SFIC", "SFIC (smooth)", "ICRF")
 lvs2 <- c(paste0(c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2"), "-1"), paste0(type, "-", c(1:10, "A", "B", "C")))
 lbs2 <- c("Cox", "Cox (smooth)", "STIC", "STIC (smooth)", "SFIC", "SFIC (smooth)", paste0("ICRF-", c(1:10, "A", "B", "C")))
-lvs3 <- c("int.error", "sup.error", "ibs.type1 (oob)", "ibs.type2 (oob)", "imse.type1", "imse.type2")
+lvs3 <- c("int.error", "sup.error", "imse.type1 (oob)", "imse.type2 (oob)", "imse.type1", "imse.type2")
 lbs3 <- c("integrated error", "supremum error", "IMSE1 (out of bag)", "IMSE2 (out of bag)", "IMSE1", "IMSE2")
 lvs4 <- 1:6
 lbs4 <- paste0("scenario ", lvs4)
@@ -170,7 +170,7 @@ for (n.monitor in c(1, 3)) {
     
     result.icrf.conv <-
       result %>%
-      dplyr::filter(method == type, measure == "ibs.type1 (oob)") %>%
+      dplyr::filter(method == type, measure == "imse.type1 (oob)") %>%
       group_by(method, sim) %>%
       summarize(convA = convMonitor(value, type = "global"),
                 convB = convMonitor(value, type = "local"),
@@ -229,7 +229,7 @@ for (n.monitor in c(1, 3)) {
     mutate(value = ifelse(grepl("IMS", measure), value * imse.multiplier, value)) %>% 
     ggplot(aes(x = methods, y = value, col = method)) +
     geom_boxplot(outlier.shape = NA) + 
-    geom_jitter(size = 0.1, width = 0.3, height = 0, size= 0.1, alpha = 0.3) +
+    geom_jitter(size = 0.1, width = 0.3, height = 0, size= 0.1, alpha = 0.2) +
     stat_summary(fun.y=mean, geom="point", shape = 22, size = 0.5, col = 'deeppink4', fill = "white") +
     geom_hline (data = grandResult.mean %>% 
                   mutate(value = ifelse(grepl("IMSE", measure), value * imse.multiplier, value)) %>% 

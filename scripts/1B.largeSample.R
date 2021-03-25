@@ -43,19 +43,19 @@ if (file.exists(fn_eval)) stop(paste0(fn_eval, " file already exits"))
 result <- list()
 
 print("1. Wilcoxon's RF (GWRS)")
-set.seed(seed.no + 1); result$w132 <- rf(method = "Wilcoxon", quasihonesty = T, ERT = T, sampsize = ntrain * 0.95, replace = F) # 0.226 / 0.209
-set.seed(seed.no + 1); result$w135 <- rf(method = "Wilcoxon", quasihonesty = F, ERT = T, sampsize = ntrain * 0.95, replace = F) # 0.226 / 0.209
+set.seed(seed.no + 1); result$w132 <- rf(method = "Wilcoxon", quasihonesty = T, ERT = T, sampsize = ntrain * 0.95, replace = F); gc()
+set.seed(seed.no + 1); result$w135 <- rf(method = "Wilcoxon", quasihonesty = F, ERT = T, sampsize = ntrain * 0.95, replace = F); gc()
 
 print("5. - 8. Fu's trees - TR1, TR2, RF1, RF2")
-set.seed(seed.no + 1); result$FuTR1 <- Fu(RF = F, smoothing = F)
-set.seed(seed.no + 1); result$FuTR2 <- Fu(RF = F, smoothing = T)
-set.seed(seed.no + 1); result$FuRF1 <- Fu(RF = T, smoothing = F)
-set.seed(seed.no + 1); result$FuRF2 <- Fu(RF = T, smoothing = T)
+set.seed(seed.no + 1); result$FuTR1 <- Fu(RF = F, smoothing = F); gc()
+set.seed(seed.no + 1); result$FuTR2 <- Fu(RF = F, smoothing = T); gc()
+set.seed(seed.no + 1); result$FuRF1 <- Fu(RF = T, smoothing = F); gc()
+set.seed(seed.no + 1); result$FuRF2 <- Fu(RF = T, smoothing = T); gc()
 #plotRF(result$FuTR1, i = 1)
 
 print("Cox regression")
-result$cox <- cox(form1, smooth = FALSE)
-result$cox.sm <- cox(form1, smooth = TRUE)
+result$cox <- cox(form1, smooth = FALSE); gc()
+result$cox.sm <- cox(form1, smooth = TRUE); gc()
 
 
 print("Evaluation and saving.")
