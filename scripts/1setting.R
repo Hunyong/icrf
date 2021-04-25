@@ -4,8 +4,9 @@
 ###  and setting up the folders, file names, etc.
 ### rf(), fu(), cox() are the generic functions made for an easy control of the arguments.
 
-setting <- function(scenario, sim, ntrain.monitor, ntree, pilot = 0, ticksize = 0.01, date = NULL, 
-                    n = NULL, tau = 5, b1 = 0.1, largeSample = FALSE, nonhonesty = FALSE) {
+setting <- function(scenario, sim, n.monitor, ntree, pilot = 0, ticksize = 0.01, date = NULL, 
+                    n = NULL, tau = 5, b1 = 0.1, 
+                    simClass = "main") {
     
     path_output <<- paste0("output/", if (is.null(date)) Sys.Date() else date,"/")
     if (!dir.exists("output/")) dir.create("output/")
@@ -17,20 +18,26 @@ setting <- function(scenario, sim, ntrain.monitor, ntree, pilot = 0, ticksize = 
     tau <<- tau
     
     # file names
-    if (!largeSample) {
+    if (simClass == "main") {
       fn_output <<- paste0(path_output, "sim_scenario_", scenario, "-n.m_", n.monitor,
                            "-nT_", ntree, "-rep_", sim, ".rds")
       fn_eval   <<- paste0(path_output, "eval_scenario_", scenario, "-n.m_", n.monitor,
                            "-nT_", ntree, "-rep_", sim, ".rds")
-    } else {
+    } else if (simClass == "size") {
       fn_output <<- paste0(path_output, "sizeSim_size_", ntrain, "-scenario_", scenario, "-n.m_", n.monitor,
                            "-nT_", ntree, "-rep_", sim, ".rds")
       fn_eval   <<- paste0(path_output, "sizeEval_size_", ntrain, "-scenario_", scenario, "-n.m_", n.monitor,
                            "-nT_", ntree, "-rep_", sim, ".rds")
-    }
-    if (nonhonesty) {
-      fn_output <<- gsub("(s|S)im\\_", "NonHonestySim_", fn_output)
-      fn_eval <<- gsub("(e|E)val\\_", "NonHonestyEval_", fn_eval)
+    } else if (simClass == "honesty") {
+      fn_output <<- paste0(path_output, "NonHonestySim_scenario_", scenario, "-n.m_", n.monitor,
+                           "-nT_", ntree, "-rep_", sim, ".rds")
+      fn_eval   <<- paste0(path_output, "NonHonestyEval_scenario_", scenario, "-n.m_", n.monitor,
+                           "-nT_", ntree, "-rep_", sim, ".rds")
+    } else if (simClass == "time") {
+      fn_output <<- paste0(path_output, "timeSim_scenario_", scenario, "-n.m_", n.monitor,
+                           "-nT_", ntree, "-nFold_", nfold, "-rep_", sim, ".rds")
+      fn_eval   <<- paste0(path_output, "timeEval_scenario_", scenario, "-n.m_", n.monitor,
+                           "-nT_", ntree, "-nFold_", nfold, "-rep_", sim, ".rds")
     }
     
     if (pilot == 1) {

@@ -39,7 +39,7 @@ source("scripts/1setting.R")
     ntree = 300L; nmin = 6; nmin.t = 20; nfold = 10          # tree parameters
   }
 }
-setting(scenario, sim, n.monitor, ntree, pilot, date = date)
+setting(scenario, sim, n.monitor, ntree, pilot, date = date, simClass = "main")
 
 if (file.exists(fn_eval)) stop(paste0(fn_eval, " file already exits"))
 
