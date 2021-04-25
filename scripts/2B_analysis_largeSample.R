@@ -32,9 +32,9 @@ names(grpVec) <- c("fold", "measure", "method")
 fn_fig3 = paste0(path_figure, "figSize_total-scenario_", scenario, "-n_m_", n.monitor,".png")
 
 ## GWRS-Quasi_honesty plot
-lvs1 <- c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "wH")
+lvs1 <- c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "w132")
 lbs1 <- c("Cox", "Cox (smooth)", "STIC", "STIC (smooth)", "SFIC", "SFIC (smooth)", "ICRF")
-lvs2 <- c(paste0(c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2"), "-1"), paste0("wH-", c(1:10, "A", "B", "C")))
+lvs2 <- c(paste0(c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2"), "-1"), paste0("w132-", c(1:10, "A", "B", "C")))
 lbs2 <- c("Cox", "Cox-Smooth", "STIC", "STIC (smooth)", "SFIC", "SFIC (smooth)", paste0("ICRF-", c(1:10, "A", "B", "C")))
 shp_method = c(0, 15, 1, 16, 2, 17, 5, 18)
 names(shp_method) = c(lbs2[1:6], "ICRF-1", "ICRF-10")
@@ -66,7 +66,7 @@ p <- list()
     result <- data.frame(value = result, grpVec, sim = rep(1:n.sim, each = dim(grpVec)[1])) %>% 
       na.omit %>% 
       dplyr::filter(grepl("(type1 \\(oob\\)|error)", measure)) %>% 
-      dplyr::filter(grepl("(^wH|cox|Fu)", method)) %>%
+      dplyr::filter(grepl("(^w|cox|Fu)", method)) %>%
       mutate(methods = paste0(method, "-", fold))
     
     result$method = factor(result$method, levels = lvs1, labels = lbs1)

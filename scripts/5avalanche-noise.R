@@ -90,6 +90,7 @@ aval.eval.array.i <-
         dimnames = list(method  = c("ICRF.best", "ICRF.H", "icrf.E", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "Cox1", "Cox2"),
                         measure = c("imse.type1", "imse.type2"),
                         size    = samp.size)) # j. = c(789, 395, 198, 99)
+aval.eval.array.null <- aval.eval.array.i
 ntree=300
 
 for (i in rng) {
@@ -105,7 +106,7 @@ for (i in rng) {
   lack <- any(! act %in% unique(min.set$GroupActivity)) || any(! cnt %in% unique(min.set$Country))
   if (lack) {
     print("Not all levels are not present in train set. Go to the next i.")
-    saveRDS(aval.eval.array.i, paste0(out_path, "/avalanche_eval_", i,".rds"))
+    saveRDS(aval.eval.array.null, paste0(out_path, "/avalanche_eval_", i,".rds"))
     if (parallel) stop("done.") else next
   }
   
@@ -310,6 +311,8 @@ if (i == 1) {
   ## 4. variable importance
   print(aval.icrf.H$importance)
   print(aval.icrf.E$importance)
+  print(aval.icrf.H$importance %>% apply(c(1,3), mean, na.rm = TRUE))
+  print(aval.icrf.E$importance %>% apply(c(1,3), mean, na.rm = TRUE))
   c(aval.icrf.H$importance[,10,"%IncIMSE1"], aval.icrf.E$importance[,10,"%IncIMSE1"]) %>% {./max(.)}
   c(aval.icrf.H$importance[,10,"%IncIMSE2"], aval.icrf.E$importance[,10,"%IncIMSE2"]) %>% {./max(.)}
   
@@ -318,6 +321,8 @@ if (i == 1) {
     expand.grid(Country = aval.noise$Country %>% levels, 
                 GroupActivity = aval.noise$GroupActivity %>% levels, 
                 BurialDepth = seq(1, 700, length.out = 100))
+  data.grid = cbind(data.grid, 
+                    matrix(rep(0, p.noise), ncol = p.noise, byrow = TRUE, nrow = dim(data.grid)[1], dimnames = list(NULL, nm.noise)))
   data.grid.pred.icrf.H <- 
     predict(aval.icrf.H, data.grid, smooth = TRUE)
   
@@ -406,18 +411,24 @@ if (i == 1) {
 
 if (FALSE) {
   aval.eval.array <-
-    array(NA, dim = c(8, 2, 4, 300),
-          dimnames = list(method  = c("ICRF.H", "icrf.E", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "Cox1", "Cox2"),
+    array(NA, dim = c(9, 2, 4, 300),
+          dimnames = list(method  = c("ICRF.best", "ICRF.H", "icrf.E", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "Cox1", "Cox2"),
                           measure = c("imse.type1", "imse.type2"),
                           size    = samp.size, # j. = c(789, 395, 198, 99)
                           replicate = 1:300))  # i.
   i.total = 0
-  for (i in 1:120) {
-    tmp <- readRDS(paste0(out_path, "/avalanche_eval_", i, ".rds"))
+  for (i in 1:300) {
+    tmp.fn = paste0(out_path, "/avalanche_eval_", i, ".rds")
+    if (file.exists(tmp.fn)) {
+      tmp <- readRDS(tmp.fn)
+    } else {
+      warning(sprintf("There does not exist %s.", tmp.fn))
+      tmp <- aval.eval.array.null
+    }
     if (all(is.na(tmp))) next
     cat(i, " ")
     i.total = i.total + 1
-    aval.eval.array[ , , , i] <- readRDS(paste0(out_path, "/avalanche_eval_", i, ".rds"))
+    aval.eval.array[ , , , i] <- tmp
     if (i.total >= 100) break
   }
   # mean

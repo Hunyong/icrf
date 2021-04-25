@@ -236,9 +236,12 @@
     cat("6.FuRF2\n"); set.seed(i); nlms.FuRF2  <- do.call(icrf, args.FuRF2)
     
     cat("7.Cox\n");   
+    nlms.cox.time <- data.frame(begin = Sys.time(), end = NA, elapsed = NA)
     nlms.cox <- 
       icenReg::ic_sp(Surv(L, R, type = 'interval2') ~ ., model = "ph", 
                      data = nlms.train)
+    nlms.cox.time["end"] = Sys.time()
+    nlms.cox.time["elapsed"] <- difftime(nlms.cox.time[["end"]], nlms.cox.time[["begin"]], units = "min")
     
     if (i %in% 1:10) {
       saveRDS(nlms.icrf.H, sprintf("%s/%snlms_ICRF.H.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
@@ -317,8 +320,8 @@
     
     nlms.eval <- 
       rbind(nlms.eval,
-            Cox1 = c(nlms.cox.imse.pred.nonsmooth, runtime = NA),
-            Cox2 = c(nlms.cox.imse.pred.smooth, runtime = NA))
+            Cox1 = c(nlms.cox.imse.pred.nonsmooth, runtime = nlms.cox.time$elapsed),
+            Cox2 = c(nlms.cox.imse.pred.smooth, runtime = nlms.cox.time$elapsed))
     print(nlms.eval)
     saveRDS(nlms.eval, paste0(out_path, "/nlms_eval_", i,".rds"))
     gc()
@@ -335,7 +338,7 @@
     nlms.FuTR2 <- readRDS(paste0(out_path, "/nlms_FuTR2.1.rds"))
     nlms.FuRF1 <- readRDS(paste0(out_path, "/nlms_FuRF1.1.rds"))
     nlms.FuRF2 <- readRDS(paste0(out_path, "/nlms_FuRF2.1.rds"))
-    nlms.cox <- readRDS(paste0(out_path, "/nlms_cox.1.rds"))
+    nlms.cox <- readRDS(paste0(out_path, "/nlms_cox.rds"))
     
     
     ## 4. variable importance   #Health insurance type, age are the most important factors according to IMSE criterion (for node impurity, weight and health is the most important).
