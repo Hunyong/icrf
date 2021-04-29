@@ -33,9 +33,9 @@ fn_fig3 = paste0(path_figure, "figSize_total-scenario_", scenario, "-n_m_", n.mo
 
 ## GWRS-Quasi_honesty plot
 lvs1 <- c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "w132")
-lbs1 <- c("Cox", "Cox (smooth)", "STIC", "STIC (smooth)", "SFIC", "SFIC (smooth)", "ICRF")
+lbs1 <- c("Cox", "Cox (*)", "Fu", "Fu (*)", "Yao", "Yao (*)", "ICRF")
 lvs2 <- c(paste0(c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2"), "-1"), paste0("w132-", c(1:10, "A", "B", "C")))
-lbs2 <- c("Cox", "Cox-Smooth", "STIC", "STIC (smooth)", "SFIC", "SFIC (smooth)", paste0("ICRF-", c(1:10, "A", "B", "C")))
+lbs2 <- c("Cox", "Cox (*)", "Fu", "Fu (*)", "Yao", "Yao (*)", paste0("ICRF-", c(1:10, "A", "B", "C")))
 shp_method = c(0, 15, 1, 16, 2, 17, 5, 18)
 names(shp_method) = c(lbs2[1:6], "ICRF-1", "ICRF-10")
 lty_method = rep(c("dotted", "solid"), 4)

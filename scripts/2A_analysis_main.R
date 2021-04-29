@@ -255,4 +255,4 @@ for (n.monitor in c(1, 3)) {
   gc()
 }
 p <- gridExtra::marrangeGrob(p[c(1, 3)], nrow=1, ncol=2, top = NULL)
-ggsave(gsub("n\\_m.*png", "com.png", fn_fig3), p, width = 12, height = 7)
+ggsave(gsub("n\\_m.*png", "com.png", fn_fig3), p, width = 12, height = 5.5)
