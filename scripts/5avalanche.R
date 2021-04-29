@@ -111,7 +111,7 @@ if (is.na(i)) {
                           tau = log(tau + 1), proximity = F, importance = (i==1), nPerm = 10,
                           nfold = nfold, ntree = ntree, nodesize = 6, mtry = 2,         # tree structure
                           replace = F, sampsize = samp.size * 0.95,    # resampling 
-                          method = "Wilcoxon", ERT = TRUE, uniformERT = TRUE,      # splitting rules
+                          split.rule = "Wilcoxon", ERT = TRUE, uniformERT = TRUE,      # splitting rules
                           quasihonesty = TRUE, timeSmooth = aval.Grid)
     
     cat("ICRF - Exploitative\n")
@@ -122,7 +122,7 @@ if (is.na(i)) {
                           tau = log(tau + 1), proximity = F, importance = (i==1), nPerm = 10,
                           nfold = nfold, ntree = ntree, nodesize = 6, mtry = 2,         # tree structure
                           replace = F, sampsize = samp.size * 0.95,    # resampling 
-                          method = "Wilcoxon", ERT = TRUE, uniformERT = TRUE,      # splitting rules
+                          split.rule = "Wilcoxon", ERT = TRUE, uniformERT = TRUE,      # splitting rules
                           quasihonesty = FALSE, timeSmooth = aval.Grid)
     
     
@@ -141,7 +141,7 @@ if (is.na(i)) {
                           tau = log(tau + 1), proximity = F, importance = (i==1), nPerm = 10,
                           nfold = 1, ntree = 1, nodesize = 20, mtry = 3,          # tree structure
                           replace = F, sampsize = samp.size,          # resampling 
-                          method = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,# splitting rules
+                          split.rule = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,# splitting rules
                           quasihonesty = TRUE, initialSmoothing = FALSE, bandwidth = 0)
     
     ## 1.2.2 Fu's Tree 2
@@ -153,7 +153,7 @@ if (is.na(i)) {
                           tau = log(tau + 1), proximity = F, importance = (i==1), nPerm = 10,
                           nfold = 1, ntree = 1, nodesize = 20, mtry = 3,          # tree structure
                           replace = F, sampsize = samp.size,          # resampling 
-                          method = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,# splitting rules
+                          split.rule = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,# splitting rules
                           quasihonesty = TRUE, initialSmoothing = FALSE, bandwidth = NULL)
     
     ## 1.3.1 Fu's RF 1
@@ -165,7 +165,7 @@ if (is.na(i)) {
                           tau = log(tau + 1), proximity = F, importance = (i==1), nPerm = 10,
                           nfold = 1, ntree = ntree, nodesize = 6, mtry = 2,               # tree structure
                           replace = T, sampsize = ceiling(.632 * samp.size),# resampling 
-                          method = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,      # splitting rules
+                          split.rule = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,      # splitting rules
                           quasihonesty = TRUE, initialSmoothing = FALSE, bandwidth = 0)
     
     ## 1.3.2 Fu's RF 2
@@ -177,7 +177,7 @@ if (is.na(i)) {
                           tau = log(tau + 1), proximity = F, importance = (i==1), nPerm = 10,
                           nfold = 1, ntree = ntree, nodesize = 6, mtry = 2,               # tree structure
                           replace = T, sampsize = ceiling(.632 * samp.size),# resampling 
-                          method = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,      # splitting rules
+                          split.rule = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,      # splitting rules
                           quasihonesty = TRUE, initialSmoothing = FALSE, bandwidth = NULL)
     
     
@@ -370,7 +370,7 @@ if (is.na(i)) {
     data.grid.long <-
       data.grid %>% tidyr::gather(key = "method", value = "ET", ICRF.H, ICRF.E, STIC, SFIC, Cox) %>% 
       mutate(method = factor(method, levels = c("ICRF.H", "ICRF.E", "STIC", "SFIC", "Cox"),
-                             labels = c("ICRF (quasi honest)", "ICRF (exploitative)", "STIC (smooth)", "SFIC (Smooth)", "Cox (Smooth)")))
+                             labels = c("ICRF (quasi honest)", "ICRF (exploitative)", "Fu (*)", "Yao (*)", "Cox (*)")))
     
     lab.country <- c("Switzerland", "Canada")
     names(lab.country) <- c("CH", "CND")
@@ -388,25 +388,26 @@ if (is.na(i)) {
       xlab("burial depth (in cm)") +
       ylab("expected log survival time (in minutes)") +
       theme_bw() +
-      theme(legend.position = "bottom", legend.box = "vertical") +
+      # theme(legend.position = "bottom", legend.box = "vertical") +
+      theme(legend.position = "right") +
       guides(size = guide_legend("number of data points"),
              color = guide_legend("group activity"))
-    ggsave(paste0(fig_path, "/fig_avalanche_ET.png"), width = 20, height = 30, units = "cm")
+    ggsave(paste0(fig_path, "/fig_avalanche_ET.png"), width = 32, height = 18, units = "cm")
     
-    data.grid.long %>% 
-      mutate(GroupActivity = factor(GroupActivity, levels = lab.activity)) %>% 
-      ggplot(aes(BurialDepth, y = ET, col = GroupActivity)) +
-      geom_line() +
-      facet_grid(method ~ Country, labeller = labeller(Country = lab.country)) +
-      geom_count(data = avalanche, mapping = aes(x = BurialDepth, y = 1, col = GroupActivity), 
-                 alpha = 0.5, position = ggstance::position_dodgev(height=0.3)) +
-      xlab("burial depth (in cm)") +
-      ylab("expected log survival time (in minutes)") +
-      theme_bw() +
-      theme(legend.box = "vertical") +
-      guides(size = guide_legend("number of data points"),
-             color = guide_legend("group activity"))
-    ggsave(paste0(fig_path, "/fig_avalanche_ET_.png"), width = 30, height = 19, units = "cm")
+    # data.grid.long %>% 
+    #   mutate(GroupActivity = factor(GroupActivity, levels = lab.activity)) %>% 
+    #   ggplot(aes(BurialDepth, y = ET, col = GroupActivity)) +
+    #   geom_line() +
+    #   facet_grid(method ~ Country, labeller = labeller(Country = lab.country)) +
+    #   geom_count(data = avalanche, mapping = aes(x = BurialDepth, y = 1, col = GroupActivity), 
+    #              alpha = 0.5, position = ggstance::position_dodgev(height=0.3)) +
+    #   xlab("burial depth (in cm)") +
+    #   ylab("expected log survival time (in minutes)") +
+    #   theme_bw() +
+    #   theme(legend.box = "vertical") +
+    #   guides(size = guide_legend("number of data points"),
+    #          color = guide_legend("group activity"))
+    # ggsave(paste0(fig_path, "/fig_avalanche_ET_.png"), width = 30, height = 19, units = "cm")
     
   }
   
@@ -442,7 +443,7 @@ if (is.na(i)) {
     
     ## WRS312 plot
     lvs1 <- c("Cox1", "Cox2", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "ICRF.H", "icrf.E")
-    lbs1 <- c("Cox", "Cox (smooth)", "STIC", "STIC (smooth)", "SFIC", "SFIC (smooth)", "ICRF (quasi-honest)", "ICRF (exploitative)")
+    lbs1 <- c("Cox", "Cox (*)", "Fu", "Fu (*)", "Yao", "Yao (*)", "ICRF (quasi-honest)", "ICRF (exploitative)")
     lvs3 <- c("imse.type1", "imse.type2")
     lbs3 <- c("IMSE1", "IMSE2")
     # lvs5 <- lbs5 <- samp.size[4:1]

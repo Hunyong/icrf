@@ -195,7 +195,7 @@
            tau = tau, proximity = F, importance = FALSE, nPerm = 10,
            nfold = nfold, ntree = ntree, nodesize = 6, mtry = 4,         # tree structure
            replace = F, sampsize = dim(nlms.train)[1] * .95,    # resampling 
-           method = "Wilcoxon", ERT = TRUE, uniformERT = TRUE,      # splitting rules
+           split.rule = "Wilcoxon", ERT = TRUE, uniformERT = TRUE,      # splitting rules
            quasihonesty = TRUE, timeSmooth = nlms.Grid)
     args.E$quasihonesty = FALSE
     
@@ -206,7 +206,7 @@
            tau = tau, proximity = F, importance = FALSE, nPerm = 10,
            nfold = 1, ntree = 1, nodesize = 20, mtry = dim(nlms.train)[2] - 2,         # tree structure
            replace = F, sampsize = dim(nlms.train)[1],    # resampling 
-           method = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,      # splitting rules
+           split.rule = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,      # splitting rules
            quasihonesty = TRUE, initialSmoothing = FALSE, bandwidth = 0, 
            timeSmooth = nlms.Grid)
     args.FuTR2$bandwidth = NULL # smoothing
@@ -218,7 +218,7 @@
            tau = tau, proximity = F, importance = FALSE, nPerm = 10,
            nfold = 1, ntree = ntree, nodesize = 6, mtry = 4,         # tree structure
            replace = T, sampsize = dim(nlms.train)[1] * .632,    # resampling 
-           method = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,      # splitting rules
+           split.rule = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,      # splitting rules
            quasihonesty = TRUE, initialSmoothing = FALSE, bandwidth = 0,
            timeSmooth = nlms.Grid)
     args.FuRF2$bandwidth = NULL # smoothing
@@ -344,8 +344,10 @@
     ## 4. variable importance   #Health insurance type, age are the most important factors according to IMSE criterion (for node impurity, weight and health is the most important).
     print(nlms.icrf.H$importance %>% apply(c(1,3), mean) %>% as.data.frame %>% arrange(desc(`%IncIMSE1`)))
     print(nlms.icrf.E$importance %>% apply(c(1,3), mean) %>% as.data.frame %>% arrange(desc(`%IncIMSE1`)))
-    c(nlms.icrf.H$importance[,nlms.icrf.H$bestFold$bestFold,"%IncIMSE1"], nlms.icrf.E$importance[,nlms.icrf.E$bestFold$bestFold,"%IncIMSE1"]) %>% {./max(.)}
-    c(nlms.icrf.H$importance[,nlms.icrf.H$bestFold$bestFold,"%IncIMSE2"], nlms.icrf.E$importance[,nlms.icrf.E$bestFold$bestFold,"%IncIMSE2"]) %>% {./max(.)}
+    c(nlms.icrf.H$importance[,nlms.icrf.H$bestFold$bestFold,"%IncIMSE1"]) %>% {./{max(.) %>% print}} %>% round(2) %>%  sort
+    c(nlms.icrf.E$importance[,nlms.icrf.E$bestFold$bestFold,"%IncIMSE1"]) %>% {./{max(.) %>% print}} %>% round(2) %>%  sort
+    c(nlms.FuRF1$importance[,nlms.FuRF1$bestFold$bestFold,"%IncIMSE1"]) %>% {./{max(.) %>% print}} %>% round(2) %>%  sort
+    c(nlms.FuRF2$importance[,nlms.FuRF2$bestFold$bestFold,"%IncIMSE1"]) %>% {./{max(.) %>% print}} %>% round(2) %>%  sort
     
     # ## 5. survival prediction
     # data.grid <-
@@ -462,7 +464,7 @@
 
     ## WRS312 plot
     lvs1 <- c("Cox1", "Cox2", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "ICRF.H", "icrf.E")
-    lbs1 <- c("Cox", "Cox (smooth)", "STIC", "STIC (smooth)", "SFIC", "SFIC (smooth)", "ICRF (quasi-honest)", "ICRF (exploitative)")
+    lbs1 <- c("Cox", "Cox (*)", "Fu", "Fu (*)", "Yao", "Yao (*)", "ICRF (quasi-honest)", "ICRF (exploitative)")
     lvs3 <- c("imse.type1", "imse.type2")
     lbs3 <- c("IMSE1", "IMSE2")
     # lvs5 <- lbs5 <- samp.size[4:1]
@@ -495,7 +497,9 @@
       geom_jitter(width = 0.2, height = 0, alpha = 0.2) +
       theme(axis.text.x = element_text(angle = 40)) +
       theme_bw() +
-      geom_point(data = nlms.eval.summary, aes(method, mean), col = "black", shape = "square") 
+      scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
+      geom_point(data = nlms.eval.summary, aes(method, mean), col = "black", shape = "square") +
+      guides(col = FALSE)
     # + ylim(c(0.075, 0.2))
       
     ggsave(paste0(fig_path, "/fig_nlms_box.png"), width = 20, height = 15, units = "cm")
