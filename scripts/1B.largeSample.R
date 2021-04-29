@@ -42,8 +42,8 @@ if (file.exists(fn_eval)) stop(paste0(fn_eval, " file already exits"))
 result <- list()
 
 print("1. Wilcoxon's RF (GWRS)")
-set.seed(seed.no + 1); result$w132 <- rf(method = "Wilcoxon", quasihonesty = T, ERT = T, sampsize = ntrain * 0.95, replace = F); gc()
-set.seed(seed.no + 1); result$w135 <- rf(method = "Wilcoxon", quasihonesty = F, ERT = T, sampsize = ntrain * 0.95, replace = F); gc()
+set.seed(seed.no + 1); result$w132 <- rf(split.rule = "Wilcoxon", quasihonesty = T, ERT = T, sampsize = ntrain * 0.95, replace = F); gc()
+set.seed(seed.no + 1); result$w135 <- rf(split.rule = "Wilcoxon", quasihonesty = F, ERT = T, sampsize = ntrain * 0.95, replace = F); gc()
 
 print("5. - 8. Fu's trees - TR1, TR2, RF1, RF2")
 set.seed(seed.no + 1); result$FuTR1 <- Fu(RF = F, smoothing = F); gc()

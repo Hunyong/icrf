@@ -20,6 +20,20 @@ fn_eval_tmp   <- paste0(path_output, "eval_scenario_", "scn", "-n.m_", "nm",
                         "-nT_", ntree, "-rep_", "sm", ".rds")
 fn_pred_tmp   <- paste0(path_output, "sim_scenario_", "scn", "-n.m_", "nm",
                         "-nT_", ntree, "-rep_", "sm", ".rds")
+lvs1 <- c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2", type)
+lbs1 <- c("Cox", "Cox (*)", "Fu", "Fu (*)", "Yao", "Yao (*)", "ICRF")
+lvs2 <- c(paste0(c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2"), "-1"), 
+          paste0("ICRF", "-", c(1:10, "A", "B", "C")))
+lbs2 <- c("Cox", "Cox (*)", "Fu", "Fu (*)", "Yao", "Yao (*)", 
+          paste0("ICRF-", c(1:10, "A", "B", "C")))
+lvs2B <- c(paste0(c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2"), "-1"), 
+          paste0("wH", "-", c(1:10, "A", "B", "C")))
+lbs2B <- c("Cox", "Cox (*)", "Fu", "Fu (*)", "Yao", "Yao (*)", 
+          paste0("ICRF-", c(1:10, "A", "B", "C")))
+lvs3 <- c("int.error", "sup.error", "imse.type1 (oob)", "imse.type2 (oob)", "imse.type1", "imse.type2")
+lbs3 <- c("integrated error", "supremum error", "IMSE1 (out of bag)", "IMSE2 (out of bag)", "IMSE1", "IMSE2")
+lvs4 <- 1:6
+lbs4 <- paste0("scenario ", lvs4)
 
   tmp <- fnfun(1, 1, 1, fn = fn_eval_tmp)
   tmp[,,]<- NA
@@ -27,10 +41,6 @@ fn_pred_tmp   <- paste0(path_output, "sim_scenario_", "scn", "-n.m_", "nm",
   dmn <- dimnames(tmp)
   grpVec <- do.call(expand.grid, dimnames(tmp))
   names(grpVec) <- c("fold", "measure", "method")
-  lvs2 <- c(paste0(c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2"), "-1"), 
-            paste0("ICRF", "-", c(1:10, "A", "B", "C")))
-  lbs2 <- c("Cox", "Cox (smooth)", "STIC", "STIC (smooth)", "SFIC", "SFIC (smooth)", 
-            paste0("ICRF-", c(1:10, "A", "B", "C")))
   pd <- position_dodge(0.2)
   
 for (n.monitor in c(1, 3)) {
@@ -124,8 +134,8 @@ for (n.monitor in c(1, 3)) {
     geom_line(data = grandResult.gg %>% filter(fold != "A"), alpha = 0.3) +
     theme_bw() +  xlab("iterations") +
     ylab("integrated error (1Q, mean, 3Q)") + 
-    theme(axis.text.x = element_text(angle = 90), legend.position = "bottom") # +
-  ggsave(fn_fig,  width = 6, height = 9)
+    theme(axis.text.x = element_text(angle = 90), legend.position = "bottom")
+  ggsave(fn_fig,  width = 8, height = 6)
   gc()
   
 }
@@ -134,14 +144,14 @@ for (n.monitor in c(1, 3)) {
 ## GWRS-Quasi_honesty plot
 type = "wH"
 wcoxFu = paste0("(^", type, "|cox|Fu)")
-lvs1 <- c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2", type)
-lbs1 <- c("Cox", "Cox (smooth)", "STIC", "STIC (smooth)", "SFIC", "SFIC (smooth)", "ICRF")
-lvs2 <- c(paste0(c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2"), "-1"), paste0(type, "-", c(1:10, "A", "B", "C")))
-lbs2 <- c("Cox", "Cox (smooth)", "STIC", "STIC (smooth)", "SFIC", "SFIC (smooth)", paste0("ICRF-", c(1:10, "A", "B", "C")))
-lvs3 <- c("int.error", "sup.error", "imse.type1 (oob)", "imse.type2 (oob)", "imse.type1", "imse.type2")
-lbs3 <- c("integrated error", "supremum error", "IMSE1 (out of bag)", "IMSE2 (out of bag)", "IMSE1", "IMSE2")
-lvs4 <- 1:6
-lbs4 <- paste0("scenario ", lvs4)
+# lvs1 <- c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2", type)
+# lbs1 <- c("Cox", "Cox (smooth)", "STIC", "STIC (smooth)", "SFIC", "SFIC (smooth)", "ICRF")
+# lvs2 <- c(paste0(c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2"), "-1"), paste0(type, "-", c(1:10, "A", "B", "C")))
+# lbs2 <- c("Cox", "Cox (smooth)", "STIC", "STIC (smooth)", "SFIC", "SFIC (smooth)", paste0("ICRF-", c(1:10, "A", "B", "C")))
+# lvs3 <- c("int.error", "sup.error", "imse.type1 (oob)", "imse.type2 (oob)", "imse.type1", "imse.type2")
+# lbs3 <- c("integrated error", "supremum error", "IMSE1 (out of bag)", "IMSE2 (out of bag)", "IMSE1", "IMSE2")
+# lvs4 <- 1:6
+# lbs4 <- paste0("scenario ", lvs4)
 p <- list()
 for (n.monitor in c(1, 3)) {
   fn_fig3 = paste0(path_figure, "figWRS_total_", type, "_n_m_", n.monitor,".png")
@@ -200,7 +210,7 @@ for (n.monitor in c(1, 3)) {
       rbind(result, result.A, result.B, result.C)
     
     result$method = factor(result$method, levels = lvs1, labels = lbs1)
-    result$methods = factor(result$methods, levels = lvs2, labels = lbs2)
+    result$methods = factor(result$methods, levels = lvs2B, labels = lbs2B)
     result$measure = factor(result$measure, levels = lvs3, labels = lbs3)
     result.mean <- aggregate(value ~ methods + measure + method, data = result, mean, na.rm = T)
     result.min <- aggregate(value ~ measure, data = result.mean, min, na.rm = TRUE)
@@ -240,7 +250,7 @@ for (n.monitor in c(1, 3)) {
     facet_grid(scenario ~ measure, scales = "free") + guides(label = FALSE, col = FALSE) +
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90)) -> p.tmp
-  ggsave(fn_fig3, p.tmp, width = 6, height = 9)
+  ggsave(fn_fig3, p.tmp, width = 6, height = 6)
   p[[n.monitor]] <- p.tmp
   gc()
 }

@@ -24,7 +24,7 @@ source("scripts/1setting.R")
 {
   ticksize = 0.01; ntest = 300        # test set size for evaluation
   #ticksize = tau/100   # size of grid for evaluation
-  n.sim = 100
+  n.sim = 300
   if (pilot == 1) {
     ntree = 10L; nmin = 6; nmin.t = 20; nfold = 2           # tree parameters
   } else {
@@ -38,7 +38,7 @@ if (file.exists(fn_eval)) stop(paste0(fn_eval, " file already exits"))
 result <- list()
 
 print("1. Wilcoxon's RF (GWRS), non-honest (exploitative) trees")  #updateNPMLE = TRUE: quasihonesty, FALSE : exploitative
-set.seed(seed.no + 1); result$wE <- rf(method = "Wilcoxon", quasihonesty = F, ERT = T, sampsize = ntrain * 0.95, replace = F) # 0.226 / 0.209
+set.seed(seed.no + 1); result$wE <- rf(split.rule = "Wilcoxon", quasihonesty = F, ERT = T, sampsize = ntrain * 0.95, replace = F) # 0.226 / 0.209
 
 print("Evaluation and saving.")
 result.eval <- summaryEval(result)

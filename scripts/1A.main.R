@@ -32,7 +32,7 @@ source("scripts/1setting.R")
 { 
   ticksize = 0.01; ntest = 300        # test set size for evaluation
   #ticksize = tau/100   # size of grid for evaluation
-  n.sim = 100
+  n.sim = 300
   if (pilot == 1) {
     ntree = 10L; nmin = 6; nmin.t = 20; nfold = 3           # tree parameters
   } else {
@@ -46,20 +46,20 @@ if (file.exists(fn_eval)) stop(paste0(fn_eval, " file already exits"))
 result <- list()
 
 print("1. Wilcoxon's RF (GWRS)")
-set.seed(seed.no + 1); result$wH <- rf(method = "Wilcoxon", quasihonesty = T, ERT = T, sampsize = ntrain * 0.95, replace = F)
-set.seed(seed.no + 1); result$wE <- rf(method = "Wilcoxon", quasihonesty = F, ERT = T, sampsize = ntrain * 0.95, replace = F)
+set.seed(seed.no + 1); result$wH <- rf(split.rule = "Wilcoxon", quasihonesty = T, ERT = T, sampsize = ntrain * 0.95, replace = F)
+set.seed(seed.no + 1); result$wE <- rf(split.rule = "Wilcoxon", quasihonesty = F, ERT = T, sampsize = ntrain * 0.95, replace = F)
 
 print("2. logrank RF (GLR)")
-set.seed(seed.no + 1); result$lH <- rf(method = "logrank", quasihonesty = T, ERT = T, sampsize = ntrain * 0.95, replace = F)
-set.seed(seed.no + 1); result$lE <- rf(method = "logrank", quasihonesty = F, ERT = T, sampsize = ntrain * 0.95, replace = F)
+set.seed(seed.no + 1); result$lH <- rf(split.rule = "logrank", quasihonesty = T, ERT = T, sampsize = ntrain * 0.95, replace = F)
+set.seed(seed.no + 1); result$lE <- rf(split.rule = "logrank", quasihonesty = F, ERT = T, sampsize = ntrain * 0.95, replace = F)
 
 print("3. Peto's Wilcoxon RF (SWRS)")
-set.seed(seed.no + 1); result$swH <- rf(method = "PetoWilcoxon", quasihonesty = T, ERT = T, sampsize = ntrain * 0.95, replace = F)
-set.seed(seed.no + 1); result$swE <- rf(method = "PetoWilcoxon", quasihonesty = F, ERT = T, sampsize = ntrain * 0.95, replace = F)
+set.seed(seed.no + 1); result$swH <- rf(split.rule = "PetoWilcoxon", quasihonesty = T, ERT = T, sampsize = ntrain * 0.95, replace = F)
+set.seed(seed.no + 1); result$swE <- rf(split.rule = "PetoWilcoxon", quasihonesty = F, ERT = T, sampsize = ntrain * 0.95, replace = F)
 
 print("4. Peto's logrank RF (SLR)")
-set.seed(seed.no + 1); result$slH <- rf(method = "PetoLogrank", quasihonesty = T, ERT = T, sampsize = ntrain * 0.95, replace = F)
-set.seed(seed.no + 1); result$slE <- rf(method = "PetoLogrank", quasihonesty = F, ERT = T, sampsize = ntrain * 0.95, replace = F)
+set.seed(seed.no + 1); result$slH <- rf(split.rule = "PetoLogrank", quasihonesty = T, ERT = T, sampsize = ntrain * 0.95, replace = F)
+set.seed(seed.no + 1); result$slE <- rf(split.rule = "PetoLogrank", quasihonesty = F, ERT = T, sampsize = ntrain * 0.95, replace = F)
 
 print("5. - 8. Fu's trees - TR1, TR2, RF1, RF2")
 set.seed(seed.no + 1); result$FuTR1 <- Fu(RF = F, smoothing = F)
