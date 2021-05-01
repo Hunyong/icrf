@@ -1,1 +1,0 @@
-for j in {1..300}; do sbatch scripts/bash-icrf-honesty.sh $j; done
