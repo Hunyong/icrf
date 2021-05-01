@@ -12,7 +12,7 @@
 
 ### 0. library, set up, and data
   # 0.0 library
-  #install.packages("/Users/hunyongcho/Documents/1Research/Rpackages/icrf_1.0.2.tar.gz", repos = NULL, INSTALL_opts = c('--no-lock'))
+  #install.packages("/Users/hunyongcho/Documents/1Research/Rpackages/icrf_1.1.0.tar.gz", repos = NULL, INSTALL_opts = c('--no-lock'))
   library(dplyr)
   library(icrf)
   library(survival)

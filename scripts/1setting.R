@@ -34,9 +34,9 @@ setting <- function(scenario, sim, n.monitor, ntree, pilot = 0, ticksize = 0.01,
       fn_eval   <<- paste0(path_output, "NonHonestyEval_scenario_", scenario, "-n.m_", n.monitor,
                            "-nT_", ntree, "-rep_", sim, ".rds")
     } else if (simClass == "time") {
-      fn_output <<- paste0(path_output, "timeSim_scenario_", scenario, "-n.m_", n.monitor,
+      fn_output <<- paste0(path_output, "timeSim_size_", ntrain, "-scenario_", scenario, "-n.m_", n.monitor,
                            "-nT_", ntree, "-nFold_", nfold, "-rep_", sim, ".rds")
-      fn_eval   <<- paste0(path_output, "timeEval_scenario_", scenario, "-n.m_", n.monitor,
+      fn_eval   <<- paste0(path_output, "timeEval_size_", ntrain, "-scenario_", scenario, "-n.m_", n.monitor,
                            "-nT_", ntree, "-nFold_", nfold, "-rep_", sim, ".rds")
     }
     
@@ -123,7 +123,7 @@ rf <- function(...) {
                       ...)
 }
 
-Fu <- function(RF = T, smoothing = T, method = "PetoLogrank") {
+Fu <- function(RF = T, smoothing = T, split.rule = "PetoLogrank") {
   print(paste0(ifelse(RF, "FuRF", "FuTree"), ifelse(smoothing, " with", " without"), " smoothing" ))
   if (RF) {
     nSamp = ceiling(.632 * ntrain)
@@ -149,7 +149,7 @@ Fu <- function(RF = T, smoothing = T, method = "PetoLogrank") {
                        keep.forest = T, proximity = T,
                        nodesize = n.min, bandwidth = bw,
                        sampsize = nSamp, replace = repl, mtry = mTry, ntree = nTree, nfold = 1,
-                       method = method, quasihonesty = T, ERT = F)
+                       split.rule = split.rule, quasihonesty = T, ERT = F)
 }
 
 cox <- function(formula, smooth = FALSE) {
