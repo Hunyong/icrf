@@ -342,8 +342,8 @@
     
     
     ## 4. variable importance   #Health insurance type, age are the most important factors according to IMSE criterion (for node impurity, weight and health is the most important).
-    print(nlms.icrf.H$importance %>% apply(c(1,3), mean) %>% as.data.frame %>% arrange(desc(`%IncIMSE1`)))
-    print(nlms.icrf.E$importance %>% apply(c(1,3), mean) %>% as.data.frame %>% arrange(desc(`%IncIMSE1`)))
+    print(nlms.icrf.H$importance %>% apply(c(1,3), mean) %>% as.data.frame %>% arrange(desc(`%IncIMSE1`)) %>% round(3))
+    print(nlms.icrf.E$importance %>% apply(c(1,3), mean) %>% as.data.frame %>% arrange(desc(`%IncIMSE1`)) %>% round(3))
     c(nlms.icrf.H$importance[,nlms.icrf.H$bestFold$bestFold,"%IncIMSE1"]) %>% {./{max(.) %>% print}} %>% round(2) %>%  sort
     c(nlms.icrf.E$importance[,nlms.icrf.E$bestFold$bestFold,"%IncIMSE1"]) %>% {./{max(.) %>% print}} %>% round(2) %>%  sort
     c(nlms.FuRF1$importance[,nlms.FuRF1$bestFold$bestFold,"%IncIMSE1"]) %>% {./{max(.) %>% print}} %>% round(2) %>%  sort

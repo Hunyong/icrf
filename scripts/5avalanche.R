@@ -188,14 +188,14 @@ if (is.na(i)) {
                                model = "ph", data = aval.train)
     
     if (i %in% 1:10) {
-      saveRDS(aval.icrf.H, sprintf("%s/%savalanche_ICRF.H.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
-      saveRDS(aval.icrf.E, sprintf("%s/%savalanche_ICRF.E.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
-      saveRDS(aval.FuTR1, sprintf("%s/%savalanche_FuTR1.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
-      saveRDS(aval.FuTR2, sprintf("%s/%savalanche_FuTR2.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
-      saveRDS(aval.FuRF1, sprintf("%s/%savalanche_FuRF1.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
-      saveRDS(aval.FuRF2, sprintf("%s/%savalanche_FuTR2.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
+      saveRDS(aval.icrf.H, sprintf("%s/%savalanche_ICRF.H.%s.rds", out_path, i))
+      saveRDS(aval.icrf.E, sprintf("%s/%savalanche_ICRF.E.%s.rds", out_path, i))
+      saveRDS(aval.FuTR1, sprintf("%s/%savalanche_FuTR1.%s.rds", out_path, i))
+      saveRDS(aval.FuTR2, sprintf("%s/%savalanche_FuTR2.%s.rds", out_path, i))
+      saveRDS(aval.FuRF1, sprintf("%s/%savalanche_FuRF1.%s.rds", out_path, i))
+      saveRDS(aval.FuRF2, sprintf("%s/%savalanche_FuTR2.%s.rds", out_path, i))
       #saveRDS(aval.cox.list, paste0(out_path, "/avalanche_cox.rds"))
-      saveRDS(aval.cox, sprintf("%s/%savalanche_Cox.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
+      saveRDS(aval.cox, sprintf("%s/%savalanche_Cox.%s.rds", out_path, i))
     }
     
     ## 2. Test set evaluation - Trees
