@@ -34,6 +34,7 @@ source("scripts/1setting.R")
     ntree = 300L; nmin = 6; nmin.t = 20; nfold = 10          # tree parameters
   }
   scenario  = 1
+  n.sim = 300
 }
 setting(scenario = scenario, sim, n.monitor, ntree, pilot, n = n, simClass = "size")
 
