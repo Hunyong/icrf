@@ -33,7 +33,9 @@ source("scripts/1setting.R")
   if (pilot == 1) {
     ntree = 10L; nmin = 6; nmin.t = 20; nfold = 2           # tree parameters
   } else {
-    ntree = 100L; nmin = round(n^0.6/6, 0) ; nmin.t = round(n^0.6/1.5, 0); nfold = 10          # tree parameters
+    ntree = 100L; nmin = round(n^0.55/5, 0) ; nmin.t = round(n^0.55/1.2, 0); nfold = 10          # tree parameters
+    ## n = 100, 200, 400, 800, 1600; nmin = 3, 4, 5, 8, 11; nmin.t = 10, 15, 22, 33, 48
+    # ntree = 100L; nmin = round(n^0.6/6, 0) ; nmin.t = round(n^0.6/1.5, 0); nfold = 10          # tree parameters
     ## n = 100, 200, 400, 800, 1600; nmin = 3, 4, 6, 9, 14; nmin.t = 11, 16, 24, 37, 56
     # ntree = 100L; nmin = round(n^0.8/16, 0) ; nmin.t = round(n^0.8 /5, 0); nfold = 10          # tree parameters
     ## n = 100, 200, 400, 800, 1600; nmin = 2, 4, 8, 13, 23; nmin.t = 8, 14, 24, 42, 73
