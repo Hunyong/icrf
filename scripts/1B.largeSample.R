@@ -33,11 +33,14 @@ source("scripts/1setting.R")
   if (pilot == 1) {
     ntree = 10L; nmin = 6; nmin.t = 20; nfold = 2           # tree parameters
   } else {
-    ntree = 100L; nmin = round(n^0.8/16, 0) ; nmin.t = round(n^0.8 /5, 0); nfold = 10          # tree parameters
-    # n = 100, 200, 400, 800, 1600; nmin = 2, 4, 8, 13, 23; nmin.t = 8, 14, 24, 42, 73
+    ntree = 100L; nmin = round(n^0.6/6, 0) ; nmin.t = round(n^0.6/1.5, 0); nfold = 10          # tree parameters
+    ## n = 100, 200, 400, 800, 1600; nmin = 3, 4, 6, 9, 14; nmin.t = 11, 16, 24, 37, 56
+    # ntree = 100L; nmin = round(n^0.8/16, 0) ; nmin.t = round(n^0.8 /5, 0); nfold = 10          # tree parameters
+    ## n = 100, 200, 400, 800, 1600; nmin = 2, 4, 8, 13, 23; nmin.t = 8, 14, 24, 42, 73
   }
   scenario  = 1
-  n.sim = 300
+n.sim = 30 # short simulations
+  #n.sim = 300
 }
 setting(scenario = scenario, sim, n.monitor, ntree, pilot, n = n, simClass = "size")
 
@@ -47,7 +50,7 @@ result <- list()
 
 print("1. Wilcoxon's RF (GWRS)")
 set.seed(seed.no + 1); result$w132 <- rf(split.rule = "Wilcoxon", quasihonesty = T, ERT = T, sampsize = ntrain * 0.95, replace = F); gc()
-set.seed(seed.no + 1); result$w135 <- rf(split.rule = "Wilcoxon", quasihonesty = F, ERT = T, sampsize = ntrain * 0.95, replace = F); gc()
+# set.seed(seed.no + 1); result$w135 <- rf(split.rule = "Wilcoxon", quasihonesty = F, ERT = T, sampsize = ntrain * 0.95, replace = F); gc()
 
 print("5. - 8. Fu's trees - TR1, TR2, RF1, RF2")
 set.seed(seed.no + 1); result$FuTR1 <- Fu(RF = F, smoothing = F); gc()
