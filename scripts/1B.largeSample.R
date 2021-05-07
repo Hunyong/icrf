@@ -46,7 +46,7 @@ source("scripts/1setting.R")
 n.sim = 30 # short simulations
   #n.sim = 300
 }
-setting(scenario = scenario, sim, n.monitor, ntree, pilot, n = n, simClass = "size")
+setting(scenario = scenario, sim, n.monitor, ntree, pilot, n = n, simClass = "size", date = date)
 
 if (file.exists(fn_eval)) stop(paste0(fn_eval, " file already exits"))
 
