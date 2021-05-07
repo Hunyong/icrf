@@ -1,5 +1,5 @@
-date = "2021-03-24"
-ntree = 300; n.sim=300; scenario = 1; n.monitor = 1
+date = "2021-05-07"
+ntree = 100; n.sim=300; scenario = 1; n.monitor = 1
 
 library(ggplot2); library(dplyr); library(purrr)
 library(icenReg); library(MASS)
@@ -21,7 +21,7 @@ fn_eval_tmp   <- paste0(path_output, "sizeEval_size_", "sz", "-scenario_", "scn"
 fn_pred_tmp   <- paste0(path_output, "sizeSim_size_", "sz", "-scenario_", "scn", "-n.m_", "nm",
                         "-nT_", ntree, "-rep_", "sm", ".rds")
 
-tmp <- fnfun(1, 1, 1, fn = fn_eval_tmp)
+tmp <- fnfun(1, 1, 1, size = 100, fn = fn_eval_tmp)
 tmp[,,]<- NA
 dm <- dim(tmp)
 # tmp <- fnfun(1000,12,12)  #NULL example
@@ -32,10 +32,12 @@ names(grpVec) <- c("fold", "measure", "method")
 fn_fig3 = paste0(path_figure, "figSize_total-scenario_", scenario, "-n_m_", n.monitor,".png")
 
 ## GWRS-Quasi_honesty plot
-lvs1 <- c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "w132")
-lbs1 <- c("Cox", "Cox (*)", "Fu", "Fu (*)", "Yao", "Yao (*)", "ICRF")
-lvs2 <- c(paste0(c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2"), "-1"), paste0("w132-", c(1:10, "A", "B", "C")))
-lbs2 <- c("Cox", "Cox (*)", "Fu", "Fu (*)", "Yao", "Yao (*)", paste0("ICRF-", c(1:10, "A", "B", "C")))
+lvs1 <- c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "w132" , "w135")
+lbs1 <- c("Cox", "Cox (*)", "Fu", "Fu (*)", "Yao", "Yao (*)", "ICRF", "ICRF_E")
+lvs2 <- c(paste0(c("cox", "cox.sm", "FuTR1", "FuTR2", "FuRF1", "FuRF2"), "-1"), 
+          paste0("w132-", c(1:10, "A", "B", "C")), paste0("w135-", c(1:10, "A", "B", "C")))
+lbs2 <- c("Cox", "Cox (*)", "Fu", "Fu (*)", "Yao", "Yao (*)", 
+          paste0("ICRF-", c(1:10, "A", "B", "C")), paste0("ICRF_E-", c(1:10, "A", "B", "C")))
 shp_method = c(0, 15, 1, 16, 2, 17, 5, 18)
 names(shp_method) = c(lbs2[1:6], "ICRF-1", "ICRF-10")
 lty_method = rep(c("dotted", "solid"), 4)
@@ -47,7 +49,7 @@ lvs4 <- 1:6
 lbs4 <- paste0("scenario ", lvs4)
 lvs5 <- lbs5 <- c(100, 200, 400, 800, 1600)
 
-p <- list()
+# p <- list()
 # for (n.monitor in c(1, 3)) {
   for (size in lvs5) {
     cat("n.monitor: ", n.monitor, ", n = ", size,", scenario = ", scenario, "\n")
@@ -105,7 +107,7 @@ grandResult.mean$size = factor(grandResult.mean$size, levels = lvs5, labels = lb
 grandResult.min$size = factor(grandResult.min$size, levels = lvs5, labels = lbs5)
 pd <- position_dodge(0.2)
 grandResult.mean %>% 
-  dplyr::filter(fold %in% c(1, 10)) %>%
+  dplyr::filter(fold %in% c(1, 10), method != "ICRF_E") %>%
   dplyr::filter(grepl("error", measure)) %>% 
   ggplot(aes(x = size, y = mean, col = methods, group = methods)) +
   geom_errorbar(aes(ymin = Q1, ymax = Q3), width = 0.1, position = pd) + 
