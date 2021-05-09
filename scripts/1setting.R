@@ -95,6 +95,7 @@ setting <- function(scenario, sim, n.monitor, ntree, pilot = 0, ticksize = 0.01,
     seed.no <<- sim * 10000
     set.seed(seed.no + 0)
     train  <<- do.call(dat.gen, c(n = ntrain, dat.args))
+    set.seed(seed.no + 9)
     Test   <<- do.call(dat.gen, c(n = ntest, dat.args))
     Grid   <<- seq(0, tau, by = ticksize)
     Grid   <<- c(Grid, Inf)

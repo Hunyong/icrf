@@ -33,7 +33,7 @@ source("scripts/1setting.R")
   if (pilot == 1) {
     ntree = 10L; nmin = 6; nmin.t = 20; nfold = 2           # tree parameters
   } else {
-    ntree = 100L; nmin = round(n^0.5/4.5 + 1, 0) ; nmin.t = round(n^0.5/1.2 + 1, 0); nfold = 10
+    ntree = 100L; nmin = round(n^0.7/12 + 2, 0) ; nmin.t = round(n^0.7/3 + 2, 0); nfold = 10
   }
   scenario  = 1
   n.sim = 300
