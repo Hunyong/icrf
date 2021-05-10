@@ -251,7 +251,7 @@
       saveRDS(nlms.FuRF1, sprintf("%s/%snlms_FuRF1.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
       saveRDS(nlms.FuRF2, sprintf("%s/%snlms_FuRF2.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
       #saveRDS(nlms.cox.list, sprintf("%s/%snlms_cox.rds", out_path, ifelse(pilot, "pilot_", ""), i))
-      saveRDS(nlms.cox, sprintf("%s/%snlms_cox.rds", out_path, ifelse(pilot, "pilot_", ""), i))
+      saveRDS(nlms.cox, sprintf("%s/%snlms_cox.%s.rds", out_path, ifelse(pilot, "pilot_", ""), i))
     }
     
     
@@ -330,7 +330,6 @@
 
   
   if (i == 1) {
-  
     # reading back the first replicate
     nlms.icrf.H <- readRDS(paste0(out_path, "/nlms_ICRF.H.1.rds"))
     nlms.icrf.E <- readRDS(paste0(out_path, "/nlms_ICRF.E.1.rds"))
@@ -338,7 +337,7 @@
     nlms.FuTR2 <- readRDS(paste0(out_path, "/nlms_FuTR2.1.rds"))
     nlms.FuRF1 <- readRDS(paste0(out_path, "/nlms_FuRF1.1.rds"))
     nlms.FuRF2 <- readRDS(paste0(out_path, "/nlms_FuRF2.1.rds"))
-    nlms.cox <- readRDS(paste0(out_path, "/nlms_cox.rds"))
+    nlms.cox <- readRDS(paste0(out_path, "/nlms_cox.1.rds"))
     
     
     ## 4. variable importance   #Health insurance type, age are the most important factors according to IMSE criterion (for node impurity, weight and health is the most important).
@@ -351,91 +350,99 @@
     
     # ## 5. survival prediction
     # data.grid <-
-    #   expand.grid(Country = nlms.complete$Country %>% levels, 
-    #               GroupActivity = nlms.complete$GroupActivity %>% levels, 
-    #               BurialDepth = seq(1, 700, length.out = 100))
-    # data.grid.pred.icrf.H <- 
+    #   expand.grid(age = 81:90,
+    #               sex = 1:2,
+    #               hitype = factor(c(0,1,2,4,5), levels = c(0,1,2,4,5)),
+    #               ssnyn = 0:1,
+    #               health = factor(1:5),
+    #               race = factor(1, levels = 1:3),
+    #               hisp = factor(3, levels = 1:3),
+    #               hhnum = 1,
+    #               reltrf = factor(2, levels = c(1,2,3,5,6)),
+    #               adjinc = 3,
+    #               tenure = factor(1, levels = 1:3),
+    #               wt = 432,
+    #               urban = factor(1, levels = 1:2),
+    #               citizen = 1)
+    # 
+    # data.grid.pred.icrf.H <-
     #   predict(nlms.icrf.H, data.grid, smooth = TRUE)
     # 
-    # data.grid.pred.icrf.E <- 
+    # data.grid.pred.icrf.E <-
     #   predict(nlms.icrf.E, data.grid, smooth = TRUE)
     # 
-    # data.grid.pred.FuRF <- 
+    # data.grid.pred.FuRF <-
     #   predict(nlms.FuRF2, data.grid, smooth = TRUE)
     # 
-    # data.grid.pred.FuTR <- 
+    # data.grid.pred.FuTR <-
     #   predict(nlms.FuTR2, data.grid, smooth = TRUE)
     # 
-    # all(data.grid.pred.icrf.H[, 201] < 0.01) # survival probability after tau is all cloase to zero.
-    # all(data.grid.pred.icrf.E[, 201] < 0.01) # survival probability after tau is all cloase to zero.
-    # all(data.grid.pred.FuTR[, 201] < 0.01) # survival probability after tau is all cloase to zero.
-    # all(data.grid.pred.FuRF[, 201] < 0.01) # survival probability after tau is all cloase to zero.
     # 
     # data.grid$ICRF.H <-
-    #   (as.matrix(data.grid.pred.icrf.H)[, -201] - as.matrix(data.grid.pred.icrf.H)[, -1]) %*% 
-    #   nlms.icrf.H$time.points.smooth[-201] + 
-    #   as.matrix(data.grid.pred.icrf.H)[, 201] * nlms.icrf.H$time.points.smooth[200] # virtually zero.
+    #   (as.matrix(data.grid.pred.icrf.H)[, -202] - as.matrix(data.grid.pred.icrf.H)[, -1]) %*%
+    #   nlms.icrf.H$time.points.smooth[-202] +
+    #   as.matrix(data.grid.pred.icrf.H)[, 202] * nlms.icrf.H$time.points.smooth[201] # virtually zero.
     # 
     # data.grid$ICRF.E <-
-    #   (as.matrix(data.grid.pred.icrf.E)[, -201] - as.matrix(data.grid.pred.icrf.E)[, -1]) %*% 
-    #   nlms.icrf.E$time.points.smooth[-201] + 
-    #   as.matrix(data.grid.pred.icrf.E)[, 201] * nlms.icrf.H$time.points.smooth[200] # virtually zero.
+    #   (as.matrix(data.grid.pred.icrf.E)[, -202] - as.matrix(data.grid.pred.icrf.E)[, -1]) %*%
+    #   nlms.icrf.E$time.points.smooth[-202] +
+    #   as.matrix(data.grid.pred.icrf.E)[, 202] * nlms.icrf.H$time.points.smooth[201] # virtually zero.
     # 
     # data.grid$STIC <-
-    #   (as.matrix(data.grid.pred.FuTR)[, -201] - as.matrix(data.grid.pred.FuTR)[, -1]) %*% 
-    #   nlms.icrf.H$time.points.smooth[-201] + 
-    #   as.matrix(data.grid.pred.FuTR)[, 201] * nlms.icrf.H$time.points.smooth[200] # virtually zero.
+    #   (as.matrix(data.grid.pred.FuTR)[, -202] - as.matrix(data.grid.pred.FuTR)[, -1]) %*%
+    #   nlms.icrf.H$time.points.smooth[-202] +
+    #   as.matrix(data.grid.pred.FuTR)[, 202] * nlms.icrf.H$time.points.smooth[201] # virtually zero.
     # 
     # 
     # data.grid$SFIC <-
-    #   (as.matrix(data.grid.pred.FuRF)[, -201] - as.matrix(data.grid.pred.FuRF)[, -1]) %*% 
-    #   nlms.icrf.H$time.points.smooth[-201] + 
-    #   as.matrix(data.grid.pred.FuRF)[, 201] * nlms.icrf.H$time.points.smooth[200] # virtually zero.
+    #   (as.matrix(data.grid.pred.FuRF)[, -202] - as.matrix(data.grid.pred.FuRF)[, -1]) %*%
+    #   nlms.icrf.H$time.points.smooth[-202] +
+    #   as.matrix(data.grid.pred.FuRF)[, 202] * nlms.icrf.H$time.points.smooth[201] # virtually zero.
     # 
     # 
     # data.grid$Cox <-
-    #   predict(nlms.cox, data.grid, type = "response")  
+    #   predict(nlms.cox, data.grid, type = "response")
     # 
     # data.grid.long <-
-    #   data.grid %>% tidyr::gather(key = "method", value = "ET", ICRF.H, ICRF.E, STIC, SFIC, Cox) %>% 
+    #   data.grid %>% tidyr::gather(key = "method", value = "ET", ICRF.H, ICRF.E, STIC, SFIC, Cox) %>%
     #   mutate(method = factor(method, levels = c("ICRF.H", "ICRF.E", "STIC", "SFIC", "Cox"),
     #                          labels = c("ICRF (quasi honest)", "ICRF (exploitative)", "STIC (smooth)", "SFIC (Smooth)", "Cox (Smooth)")))
     # 
-    # lab.country <- c("Switzerland", "Canada")
-    # names(lab.country) <- c("CH", "CND")
+    # # lab.country <- c("Switzerland", "Canada")
+    # # names(lab.country) <- c("CH", "CND")
+    # # 
+    # # lab.activity <- c("Backcountry Skiing", "Out-of-Bounds Skiing", "Mountaineering/Ice Climbing",
+    # #                   "Mechanized Skiing", "Snowmobiling", "Other Recreational", "Non-Recreational")
     # 
-    # lab.activity <- c("Backcountry Skiing", "Out-of-Bounds Skiing", "Mountaineering/Ice Climbing",
-    #                   "Mechanized Skiing", "Snowmobiling", "Other Recreational", "Non-Recreational")
-    # 
-    # data.grid.long %>% 
-    #   mutate(GroupActivity = factor(GroupActivity, levels = lab.activity)) %>% 
-    #   ggplot(aes(BurialDepth, y = ET, col = GroupActivity)) +
+    # data.grid.long %>%
+    #   # mutate(GroupActivity = factor(GroupActivity, levels = lab.activity)) %>%
+    #   ggplot(aes(age, y = ET, col = method)) +
     #   geom_line() +
-    #   facet_grid(method ~ Country, labeller = labeller(Country = lab.country)) +
-    #   geom_count(data = nlms, mapping = aes(x = BurialDepth, y = 1, col = GroupActivity), 
-    #              alpha = 0.5, position = ggstance::position_dodgev(height=0.3)) +
-    #   xlab("burial depth (in cm)") +
-    #   ylab("expected log survival time (in minutes)") +
+    #   facet_grid(hitype ~ sex + health) +# , labeller = labeller(Country = lab.country)) +
+    #   # geom_count(data = nlms, mapping = aes(x = BurialDepth, y = 1, col = GroupActivity),
+    #   #            alpha = 0.5, position = ggstance::position_dodgev(height=0.3)) +
+    #   xlab("age (in years)") +
+    #   ylab("expected survival time (in years)") +
     #   theme_bw() +
     #   theme(legend.position = "bottom", legend.box = "vertical") +
     #   guides(size = guide_legend("number of data points"),
     #          color = guide_legend("group activity"))
     # ggsave(paste0(fig_path, "/fig_nlms_ET.png"), width = 20, height = 30, units = "cm")
-    # 
-    # data.grid.long %>% 
-    #   mutate(GroupActivity = factor(GroupActivity, levels = lab.activity)) %>% 
-    #   ggplot(aes(BurialDepth, y = ET, col = GroupActivity)) +
-    #   geom_line() +
-    #   facet_grid(method ~ Country, labeller = labeller(Country = lab.country)) +
-    #   geom_count(data = nlms, mapping = aes(x = BurialDepth, y = 1, col = GroupActivity), 
-    #              alpha = 0.5, position = ggstance::position_dodgev(height=0.3)) +
-    #   xlab("burial depth (in cm)") +
-    #   ylab("expected log survival time (in minutes)") +
-    #   theme_bw() +
-    #   theme(legend.box = "vertical") +
-    #   guides(size = guide_legend("number of data points"),
-    #          color = guide_legend("group activity"))
-    # ggsave(paste0(fig_path, "/fig_nlms_ET_.png"), width = 30, height = 19, units = "cm")
+
+  #   data.grid.long %>%
+  #     mutate(GroupActivity = factor(GroupActivity, levels = lab.activity)) %>%
+  #     ggplot(aes(BurialDepth, y = ET, col = GroupActivity)) +
+  #     geom_line() +
+  #     facet_grid(method ~ Country, labeller = labeller(Country = lab.country)) +
+  #     geom_count(data = nlms, mapping = aes(x = BurialDepth, y = 1, col = GroupActivity),
+  #                alpha = 0.5, position = ggstance::position_dodgev(height=0.3)) +
+  #     xlab("burial depth (in cm)") +
+  #     ylab("expected log survival time (in minutes)") +
+  #     theme_bw() +
+  #     theme(legend.box = "vertical") +
+  #     guides(size = guide_legend("number of data points"),
+  #            color = guide_legend("group activity"))
+  #   ggsave(paste0(fig_path, "/fig_nlms_ET_.png"), width = 30, height = 19, units = "cm")
     
   }
   

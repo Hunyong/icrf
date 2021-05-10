@@ -1,5 +1,5 @@
 # Avalanche data analysis
-#install.packages("/Users/hunyongcho/Documents/1Research/Rpackages/icrf_1.0.2.tar.gz", repos = NULL, INSTALL_opts = c('--no-lock'))
+#install.packages("/Users/hunyongcho/Documents/1Research/Rpackages/icrf_1.1.0.tar.gz", repos = NULL, INSTALL_opts = c('--no-lock'))
 library(readxl)
 library(dplyr)
 library(magrittr)
@@ -102,71 +102,71 @@ if (is.na(i)) {
     
     # 1.0 models
     
-    ## 1.1 ICRF-WRS
-    cat("ICRF - Quasi honest\n")
-    set.seed(i)
-    aval.icrf.H <- 
-      icrf:::icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
-                          L = log(aval.train$L + 1), R = log(aval.train$R + 1),
-                          tau = log(tau + 1), proximity = F, importance = (i==1), nPerm = 10,
-                          nfold = nfold, ntree = ntree, nodesize = 6, mtry = 2,         # tree structure
-                          replace = F, sampsize = samp.size * 0.95,    # resampling 
-                          split.rule = "Wilcoxon", ERT = TRUE, uniformERT = TRUE,      # splitting rules
-                          quasihonesty = TRUE, timeSmooth = aval.Grid)
-    
-    cat("ICRF - Exploitative\n")
-    set.seed(i)
-    aval.icrf.E <- 
-      icrf:::icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
-                          L = log(aval.train$L + 1), R = log(aval.train$R + 1),
-                          tau = log(tau + 1), proximity = F, importance = (i==1), nPerm = 10,
-                          nfold = nfold, ntree = ntree, nodesize = 6, mtry = 2,         # tree structure
-                          replace = F, sampsize = samp.size * 0.95,    # resampling 
-                          split.rule = "Wilcoxon", ERT = TRUE, uniformERT = TRUE,      # splitting rules
-                          quasihonesty = FALSE, timeSmooth = aval.Grid)
-    
-    
-    bestForest <- data.frame(honest = NA, iter = NA, imse = NA)
-    choice <- rbind(aval.icrf.H$bestFold, aval.icrf.E$bestFold)
-    bestForest$honest <- choice$imse.best[1] < choice$imse.best[2]
-    bestForest$iter <- choice[2 - bestForest$honest, "bestFold"]
-    bestForest$imse <- choice[2 - bestForest$honest, "imse.best"]
-    
-    ## 1.2.1 Fu's Tree 1
-    cat("FuTR1\n")
-    set.seed(i)
-    aval.FuTR1 <- 
-      icrf:::icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
-                          L = log(aval.train$L + 1), R = log(aval.train$R + 1), timeSmooth = aval.Grid,
-                          tau = log(tau + 1), proximity = F, importance = (i==1), nPerm = 10,
-                          nfold = 1, ntree = 1, nodesize = 20, mtry = 3,          # tree structure
-                          replace = F, sampsize = samp.size,          # resampling 
-                          split.rule = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,# splitting rules
-                          quasihonesty = TRUE, initialSmoothing = FALSE, bandwidth = 0)
-    
+    # ## 1.1 ICRF-WRS
+    # cat("ICRF - Quasi honest\n")
+    # set.seed(i)
+    # aval.icrf.H <- 
+    #   icrf:::icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
+    #                       L = log(aval.train$L + 1), R = log(aval.train$R + 1),
+    #                       tau = log(tau + 1), proximity = F, importance = (i==1), nPerm = 10,
+    #                       nfold = nfold, ntree = ntree, nodesize = 6, mtry = 2,         # tree structure
+    #                       replace = F, sampsize = samp.size * 0.95,    # resampling 
+    #                       split.rule = "Wilcoxon", ERT = TRUE, uniformERT = TRUE,      # splitting rules
+    #                       quasihonesty = TRUE, timeSmooth = aval.Grid)
+    # 
+    # cat("ICRF - Exploitative\n")
+    # set.seed(i)
+    # aval.icrf.E <- 
+    #   icrf:::icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
+    #                       L = log(aval.train$L + 1), R = log(aval.train$R + 1),
+    #                       tau = log(tau + 1), proximity = F, importance = (i==1), nPerm = 10,
+    #                       nfold = nfold, ntree = ntree, nodesize = 6, mtry = 2,         # tree structure
+    #                       replace = F, sampsize = samp.size * 0.95,    # resampling 
+    #                       split.rule = "Wilcoxon", ERT = TRUE, uniformERT = TRUE,      # splitting rules
+    #                       quasihonesty = FALSE, timeSmooth = aval.Grid)
+    # 
+    # 
+    # bestForest <- data.frame(honest = NA, iter = NA, imse = NA)
+    # choice <- rbind(aval.icrf.H$bestFold, aval.icrf.E$bestFold)
+    # bestForest$honest <- choice$imse.best[1] < choice$imse.best[2]
+    # bestForest$iter <- choice[2 - bestForest$honest, "bestFold"]
+    # bestForest$imse <- choice[2 - bestForest$honest, "imse.best"]
+    # 
+    # ## 1.2.1 Fu's Tree 1
+    # cat("FuTR1\n")
+    # set.seed(i)
+    # aval.FuTR1 <- 
+    #   icrf:::icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
+    #                       L = log(aval.train$L + 1), R = log(aval.train$R + 1), timeSmooth = aval.Grid,
+    #                       tau = log(tau + 1), proximity = F, importance = (i==1), nPerm = 10,
+    #                       nfold = 1, ntree = 1, nodesize = 20, mtry = 3,          # tree structure
+    #                       replace = F, sampsize = samp.size,          # resampling 
+    #                       split.rule = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,# splitting rules
+    #                       quasihonesty = TRUE, initialSmoothing = FALSE, bandwidth = 0)
+    # 
     ## 1.2.2 Fu's Tree 2
     cat("FuTR2\n")
     set.seed(i)
-    aval.FuTR2 <- 
-      icrf:::icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
+    aval.FuTR2 <-
+      icrf:::icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")],
                           L = log(aval.train$L + 1), R = log(aval.train$R + 1), timeSmooth = aval.Grid,
                           tau = log(tau + 1), proximity = F, importance = (i==1), nPerm = 10,
                           nfold = 1, ntree = 1, nodesize = 20, mtry = 3,          # tree structure
-                          replace = F, sampsize = samp.size,          # resampling 
+                          replace = F, sampsize = samp.size,          # resampling
                           split.rule = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,# splitting rules
                           quasihonesty = TRUE, initialSmoothing = FALSE, bandwidth = NULL)
     
-    ## 1.3.1 Fu's RF 1
-    cat("FuRF1\n")
-    set.seed(i)
-    aval.FuRF1 <- 
-      icrf:::icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
-                          L = log(aval.train$L + 1), R = log(aval.train$R + 1), timeSmooth = aval.Grid,
-                          tau = log(tau + 1), proximity = F, importance = (i==1), nPerm = 10,
-                          nfold = 1, ntree = ntree, nodesize = 6, mtry = 2,               # tree structure
-                          replace = T, sampsize = ceiling(.632 * samp.size),# resampling 
-                          split.rule = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,      # splitting rules
-                          quasihonesty = TRUE, initialSmoothing = FALSE, bandwidth = 0)
+    # ## 1.3.1 Fu's RF 1
+    # cat("FuRF1\n")
+    # set.seed(i)
+    # aval.FuRF1 <- 
+    #   icrf:::icrf.default(x = aval.train[, c("Country", "GroupActivity", "BurialDepth")], 
+    #                       L = log(aval.train$L + 1), R = log(aval.train$R + 1), timeSmooth = aval.Grid,
+    #                       tau = log(tau + 1), proximity = F, importance = (i==1), nPerm = 10,
+    #                       nfold = 1, ntree = ntree, nodesize = 6, mtry = 2,               # tree structure
+    #                       replace = T, sampsize = ceiling(.632 * samp.size),# resampling 
+    #                       split.rule = "PetoLogrank", ERT = FALSE, uniformERT = FALSE,      # splitting rules
+    #                       quasihonesty = TRUE, initialSmoothing = FALSE, bandwidth = 0)
     
     ## 1.3.2 Fu's RF 2
     cat("FuRF2\n")
@@ -193,7 +193,7 @@ if (is.na(i)) {
       saveRDS(aval.FuTR1, sprintf("%s/avalanche_FuTR1.%s.rds", out_path, i))
       saveRDS(aval.FuTR2, sprintf("%s/avalanche_FuTR2.%s.rds", out_path, i))
       saveRDS(aval.FuRF1, sprintf("%s/avalanche_FuRF1.%s.rds", out_path, i))
-      saveRDS(aval.FuRF2, sprintf("%s/avalanche_FuTR2.%s.rds", out_path, i))
+      saveRDS(aval.FuRF2, sprintf("%s/avalanche_FuRF2.%s.rds", out_path, i))
       #saveRDS(aval.cox.list, paste0(out_path, "/avalanche_cox.rds"))
       saveRDS(aval.cox, sprintf("%s/avalanche_Cox.%s.rds", out_path, i))
     }
@@ -317,8 +317,8 @@ if (is.na(i)) {
     ## 4. variable importance
     print(aval.icrf.H$importance)
     print(aval.icrf.E$importance)
-    c(aval.icrf.H$importance[,10,"%IncIMSE1"], aval.icrf.E$importance[,10,"%IncIMSE1"]) %>% {./max(.)}
-    c(aval.icrf.H$importance[,10,"%IncIMSE2"], aval.icrf.E$importance[,10,"%IncIMSE2"]) %>% {./max(.)}
+    c(aval.icrf.H$importance[,10,"%IncIMSE1"], aval.icrf.E$importance[,10,"%IncIMSE1"]) %>% {./max(.) %>% print}
+    c(aval.icrf.H$importance[,10,"%IncIMSE2"], aval.icrf.E$importance[,10,"%IncIMSE2"]) %>% {./max(.) %>% print}
     
     ## 5. survival prediction
     data.grid <-
@@ -441,30 +441,33 @@ if (is.na(i)) {
     # sd
     aval.eval.sd <- apply(aval.eval.array, 1:2, sd, na.rm = TRUE)
     
-    ## WRS312 plot
-    lvs1 <- c("Cox1", "Cox2", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "ICRF.H", "icrf.E")
-    lbs1 <- c("Cox", "Cox (*)", "Fu", "Fu (*)", "Yao", "Yao (*)", "ICRF (quasi-honest)", "ICRF (exploitative)")
-    lvs3 <- c("imse.type1", "imse.type2")
-    lbs3 <- c("IMSE1", "IMSE2")
-    # lvs5 <- lbs5 <- samp.size[4:1]
+    print(aval.eval.m %>% round(4))
+    print(aval.eval.sd %>% round(4))
     
-    aval.eval.summary <-   
-      data.frame(expand.grid(c(dimnames(aval.eval.m)))) %>% 
-      mutate(mean = as.vector(aval.eval.m),
-             sd = as.vector(aval.eval.sd)) %>% 
-      dplyr::filter(measure != "runtime") %>% 
-      mutate(method = factor(method, levels = lvs1, labels = lbs1),
-             measure = factor(measure, levels = lvs3, labels = lbs3))
-    pd <- position_dodge(0.3)
-    ggplot(aval.eval.summary, aes(method, mean, col = method, shape = method, group = method)) +
-      geom_line(position = pd) +
-      geom_point(position = pd) +
-      geom_errorbar(aes(ymin = mean - 1.96 * sd, ymax = mean + 1.96 * sd), width = 0.1, 
-                    position = pd, alpha = 0.4) + 
-      facet_grid(. ~ measure) +
-      ylab ("Mean error with 95% confindence intervals") +
-      xlab ("training sample size")
-    ggsave(paste0(fig_path, "/fig_avalanche_size.png"), width = 20, height = 15, units = "cm")
+    # ## WRS312 plot
+    # lvs1 <- c("Cox1", "Cox2", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "ICRF.H", "ICRF.E")
+    # lbs1 <- c("Cox", "Cox (*)", "Fu", "Fu (*)", "Yao", "Yao (*)", "ICRF (quasi-honest)", "ICRF (exploitative)")
+    # lvs3 <- c("imse.type1", "imse.type2")
+    # lbs3 <- c("IMSE1", "IMSE2")
+    # # lvs5 <- lbs5 <- samp.size[4:1]
+    # 
+    # aval.eval.summary <-   
+    #   data.frame(expand.grid(c(dimnames(aval.eval.m)))) %>% 
+    #   mutate(mean = as.vector(aval.eval.m),
+    #          sd = as.vector(aval.eval.sd)) %>% 
+    #   dplyr::filter(measure != "runtime") %>% 
+    #   mutate(method = factor(method, levels = lvs1, labels = lbs1),
+    #          measure = factor(measure, levels = lvs3, labels = lbs3))
+    # pd <- position_dodge(0.3)
+    # ggplot(aval.eval.summary, aes(method, mean, col = method, shape = method, group = method)) +
+    #   geom_line(position = pd) +
+    #   geom_point(position = pd) +
+    #   geom_errorbar(aes(ymin = mean - 1.96 * sd, ymax = mean + 1.96 * sd), width = 0.1, 
+    #                 position = pd, alpha = 0.4) + 
+    #   facet_grid(. ~ measure) +
+    #   ylab ("Mean error with 95% confindence intervals") +
+    #   xlab ("training sample size")
+    # ggsave(paste0(fig_path, "/fig_avalanche_size.png"), width = 20, height = 15, units = "cm")
   }
     
     
