@@ -2,7 +2,8 @@ declare -a date=(2021-05-10)
 
 for j in {1..300}; do 
   echo "1A. bash-icrf-main.sh"
-  sbatch --time=30:00:00 scripts/bash-icrf-main.sh $j $date
+  sbatch --time=30:00:00 scripts/bash-icrf-main.sh $j 1 $date
+  sbatch --time=30:00:00 scripts/bash-icrf-main.sh $j 3 $date
   
   echo "1B. bash-icrf-sizeSim.sh"
   for i in 100 200 400; do sbatch --mem=10000 --time=1:00:00 scripts/bash-icrf-largeSample.sh $i $j 1 0 $date; done
