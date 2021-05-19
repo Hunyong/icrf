@@ -1,7 +1,8 @@
 ### 1C.honesty.R
 ### Simulations comparing quasi-honesty vs. exploitative approaches.
 
-{
+## 0. Settings
+## 0.1 simulation parameters
   # rm(list = ls())
   args = commandArgs(trailingOnly=TRUE)  # passed from script
   if (length(args) == 0) {
@@ -16,13 +17,14 @@
   pilot     = as.numeric(args[4]) # if 1 pilot, if 0 real simulation.
   date      = as.character(args[5])
   print("1C.honesty.R") # to see if partial honesty works.
-}
-library(icrf); library(icenReg); 
-library(MASS); library(dplyr); library(ggplot2)
-source("scripts/0functions.R")
-source("scripts/1setting.R")
 
-{
+## 0.2 library
+  library(icrf); library(icenReg); 
+  library(MASS); library(dplyr); library(ggplot2)
+  source("scripts/0functions.R")
+  source("scripts/1setting.R")
+
+## 0.3 rest of the settings
   ticksize = 0.01; ntest = 300        # test set size for evaluation
   #ticksize = tau/100   # size of grid for evaluation
   n.sim = 300
@@ -31,19 +33,23 @@ source("scripts/1setting.R")
   } else {
     ntree = 300L; nmin = 6; nmin.t = 20; nfold = 10          # tree parameters
   }
-}
-setting(scenario, sim, n.monitor, ntree, pilot, simClass = "honesty", date = date)
 
-if (file.exists(fn_eval)) stop(paste0(fn_eval, " file already exits"))
+  setting(scenario, sim, n.monitor, ntree, pilot, simClass = "honesty", date = date)
 
-result <- list()
+  if (file.exists(fn_eval)) stop(paste0(fn_eval, " file already exits"))
 
-print("1. Wilcoxon's RF (GWRS), non-honest (exploitative) trees")  #updateNPMLE = TRUE: quasihonesty, FALSE : exploitative
-set.seed(seed.no + 1); result$wE <- rf(split.rule = "Wilcoxon", quasihonesty = F, ERT = T, sampsize = ntrain * 0.95, replace = F) # 0.226 / 0.209
+  
+## 1. simulations
+  result <- list()
 
-print("Evaluation and saving.")
-result.eval <- summaryEval(result)
-saveRDS(result.eval, fn_eval)
-
-if (sim == 1) saveRDS(result, fn_output)
-Sys.time() - time.bgn  # time elapsed.
+  print("1. Wilcoxon's RF (GWRS), non-honest (exploitative) trees")  #updateNPMLE = TRUE: quasihonesty, FALSE : exploitative
+  set.seed(seed.no + 1); result$wE <- rf(split.rule = "Wilcoxon", quasihonesty = F, ERT = T, sampsize = ntrain * 0.95, replace = F) # 0.226 / 0.209
+  
+  
+## 2. evaluation and saving
+  print("Evaluation and saving.")
+  result.eval <- summaryEval(result)
+  saveRDS(result.eval, fn_eval)
+  
+  if (sim == 1) saveRDS(result, fn_output)
+  Sys.time() - time.bgn  # time elapsed.

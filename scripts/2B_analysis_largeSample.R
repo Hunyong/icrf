@@ -1,4 +1,4 @@
-date = "2021-05-07"
+date = "2021-05-10"
 ntree = 100; n.sim=300; scenario = 1; n.monitor = 1
 
 library(ggplot2); library(dplyr); library(purrr)
@@ -49,7 +49,7 @@ lvs4 <- 1:6
 lbs4 <- paste0("scenario ", lvs4)
 lvs5 <- lbs5 <- c(100, 200, 400, 800, 1600)
 
-# p <- list()
+grandResult <- grandResult.mean <- grandResult.min <- data.frame()
 # for (n.monitor in c(1, 3)) {
   for (size in lvs5) {
     cat("n.monitor: ", n.monitor, ", n = ", size,", scenario = ", scenario, "\n")
@@ -71,6 +71,8 @@ lvs5 <- lbs5 <- c(100, 200, 400, 800, 1600)
       dplyr::filter(grepl("(^w|cox|Fu)", method)) %>%
       mutate(methods = paste0(method, "-", fold))
     
+    if (dim(result)[1] == 0) next
+    
     result$method = factor(result$method, levels = lvs1, labels = lbs1)
     result$methods = factor(result$methods, levels = lvs2, labels = lbs2)
     result$measure = factor(result$measure, levels = lvs3, labels = lbs3)
@@ -91,15 +93,9 @@ lvs5 <- lbs5 <- c(100, 200, 400, 800, 1600)
     result.mean$size = size
     result.min$size = size
     
-    if (size == 100 && n.monitor == 1) {
-      grandResult <- result
-      grandResult.mean <- result.mean
-      grandResult.min <- result.min
-    } else {
-      grandResult <- rbind(grandResult, result)
-      grandResult.mean <- rbind(grandResult.mean, result.mean)
-      grandResult.min <- rbind(grandResult.min, result.min)
-    }
+    grandResult <- rbind(grandResult, result)
+    grandResult.mean <- rbind(grandResult.mean, result.mean)
+    grandResult.min <- rbind(grandResult.min, result.min)
   }
 #}
 grandResult$size = factor(grandResult$size, levels = lvs5, labels = lbs5)
@@ -122,3 +118,45 @@ grandResult.mean %>%
 
 ggsave(fn_fig3, width = 8, height = 5)
 gc()
+
+### 1.2. computation time comparison per sample sizes
+
+  fn_fig_time = paste0(path_figure, "figSize_time_n_m_", n.monitor,".png")
+  grandResultTime <- data.frame()
+  for (size in lvs5) {
+    print(size)  
+    resultTime <- 
+      sapply(1:n.sim, function(s) {
+        cat(s, " ")
+        tmp1 <- fnfun(scenario, n.monitor, sim = s, fn = fn_eval_tmp, size = size)
+        if (is.null(tmp1)) {
+          warning(paste0(s, " is not available."))
+          tmp1 <- NULL
+        }
+        tmp1 <- attr(tmp1, "runtime")["w132"]
+        if (is.null(tmp1)) tmp1 <- NA
+        tmp1
+      }) %>% data.frame(time = ., scenario = scenario, sim = 1:n.sim, size = size)
+    grandResultTime <- rbind(grandResultTime, resultTime)
+  }
+  
+  grandResultTime.gg <-
+    grandResultTime %>% 
+    #mutate(size = size) %>% 
+    group_by(scenario, size) %>% 
+    summarize(time  = mean(time, na.rm = TRUE)) %>% 
+    ungroup 
+  
+  grandResultTime.gg %>% 
+    ggplot(aes(size, time)) + 
+    stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 1, se = FALSE) +
+    # geom_abline(slope = 7.79/800, intercept = 0, col = "red") +
+    # geom_point(size = 3, col = "magenta") +
+    geom_bar(stat = "identity", mapping = aes(fill = (size))) +
+    guides(fill = FALSE) +
+    xlab("sample size") +
+    scale_x_continuous(breaks = c(100, 200, 400, 800, 1600)) +
+    # scale_y_log10() +
+    theme_bw() + ylab("time (in minutes)")
+  ggsave(fn_fig_time,  width = 8, height = 6)
+

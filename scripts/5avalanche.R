@@ -1,5 +1,5 @@
 # Avalanche data analysis
-#install.packages("/Users/hunyongcho/Documents/1Research/Rpackages/icrf_1.1.0.tar.gz", repos = NULL, INSTALL_opts = c('--no-lock'))
+#install.packages("/Users/hunyongcho/Documents/1Research/Rpackages/icrf_2.0.0.tar.gz", repos = NULL, INSTALL_opts = c('--no-lock'))
 library(readxl)
 library(dplyr)
 library(magrittr)
@@ -415,7 +415,7 @@ if (is.na(i)) {
     
   }
   
-  
+  ### Summary of 300 replicates. Run this only after the above part is done for all i=1..300. 
   if (FALSE) {
     method.nm = c("ICRF.H", "ICRF.E", "FuTR1", "FuTR2", "FuRF1", "FuRF2", "Cox1", "Cox2")
     aval.eval.array <-
@@ -445,7 +445,7 @@ if (is.na(i)) {
     # sd
     aval.eval.sd <- apply(aval.eval.array, 1:2, sd, na.rm = TRUE)
     
-    print(aval.eval.m %>% round(4))
+    print(aval.eval.m %>% round(3))
     print(aval.eval.sd %>% round(4))
     
     # ## WRS312 plot
